@@ -795,15 +795,19 @@ window.addEventListener('load', function() {
   document.getElementById('btn-save-alias').addEventListener('click', function(){
     var newAlias = document.getElementById('p-alias-input').value.trim();
     if (!newAlias || newAlias.length < 3) { toast('El alias debe tener al menos 3 caracteres'); return; }
-    if (newAlias === alias) { toast('Es el mismo alias actual'); return; }
-    sb.from('profiles').update({ alias: newAlias }).eq('id', user.id).then(function(r){
-      if (r.error) { toast('Error: ' + r.error.message); return; }
-      alias = newAlias;
-      document.getElementById('p-alias').textContent  = '@' + alias;
-      document.getElementById('p-avatar').textContent = alias[0].toUpperCase();
-      document.getElementById('nav-alias').textContent = '@' + alias;
-      document.getElementById('c-avatar').textContent  = alias[0].toUpperCase();
-      toast('¡Alias actualizado a @' + alias + '!');
+    if (newAlias === alias) { toast('Ya usás ese alias'); return; }
+    // Verificar si el alias ya está en uso por otro usuario
+    sb.from('profiles').select('id').eq('alias', newAlias).neq('id', user.id).maybeSingle().then(function(check){
+      if (check.data) { toast('@' + newAlias + ' ya está en uso, elegí otro'); return; }
+      sb.from('profiles').update({ alias: newAlias }).eq('id', user.id).then(function(r){
+        if (r.error) { toast('Error: ' + r.error.message); return; }
+        alias = newAlias;
+        document.getElementById('p-alias').textContent   = '@' + alias;
+        document.getElementById('p-avatar').textContent  = alias[0].toUpperCase();
+        document.getElementById('nav-alias').textContent = '@' + alias;
+        document.getElementById('c-avatar').textContent  = alias[0].toUpperCase();
+        toast('¡Alias actualizado a @' + alias + '!');
+      });
     });
   });
 
