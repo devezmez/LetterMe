@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Letter Me</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#0e0e0e; --surface:#161616; --surface2:#1e1e1e; --border:#2a2a2a;
+      --accent:#e8d5b0; --accent2:#c9a96e; --text:#f0ece4;
+      --text-muted:#6b6860; --text-dim:#9e9a94; --danger:#c0392b;
+      --font-display:'Playfair Display',serif;
+      --font-mono:'IBM Plex Mono',monospace;
+      --font-body:'IBM Plex Sans',sans-serif;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh}
+    .view{display:none}
+    #auth-view{min-height:100vh;align-items:center;justify-content:center;padding:2rem;
+      background:radial-gradient(ellipse at 20% 50%,rgba(200,169,110,.06) 0%,transparent 60%),
+                 radial-gradient(ellipse at 80% 20%,rgba(200,169,110,.04) 0%,transparent 50%),var(--bg)}
+    #auth-view.active{display:flex}
+    #app-view.active{display:block}
+    .auth-container{width:100%;max-width:420px}
+    .auth-logo{text-align:center;margin-bottom:3rem}
+    .auth-logo h1{font-family:var(--font-display);font-size:3.2rem;font-weight:900;letter-spacing:-1px;color:var(--accent);line-height:1}
+    .auth-logo p{font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);letter-spacing:.2em;text-transform:uppercase;margin-top:.5rem}
+    .auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:2rem}
+    .auth-tab{flex:1;padding:.75rem;background:none;border:none;color:var(--text-muted);font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .2s;border-bottom:2px solid transparent;margin-bottom:-1px}
+    .auth-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .auth-form{display:none;flex-direction:column;gap:1rem}
+    .auth-form.active{display:flex}
+    .field-group{display:flex;flex-direction:column;gap:.4rem}
+    label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)}
+    input[type="text"],input[type="email"],input[type="password"],textarea{
+      background:var(--surface);border:1px solid var(--border);color:var(--text);
+      font-family:var(--font-body);font-size:.95rem;padding:.75rem 1rem;border-radius:4px;outline:none;transition:border-color .2s;width:100%}
+    input:focus,textarea:focus{border-color:var(--accent2)}
+    .btn{padding:.8rem 1.5rem;border:none;border-radius:4px;cursor:pointer;font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
+    .btn-primary{background:var(--accent);color:#0e0e0e;font-weight:500}
+    .btn-primary:hover{background:var(--accent2)}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim)}
+    .btn-ghost:hover{border-color:var(--accent2);color:var(--accent)}
+    .btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+    .btn-danger:hover{background:var(--danger);color:#fff}
+    .error-msg{font-family:var(--font-mono);font-size:.75rem;color:#e74c3c;padding:.5rem;background:rgba(231,76,60,.08);border-radius:4px;border-left:2px solid #e74c3c;display:none}
+    .error-msg.show{display:block}
+    .app-header{position:sticky;top:0;z-index:100;background:rgba(14,14,14,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:58px}
+    .header-logo{font-family:var(--font-display);font-size:1.5rem;font-weight:900;color:var(--accent);letter-spacing:-.5px}
+    .header-right{display:flex;align-items:center;gap:1rem}
+    .user-badge{font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)}
+    .user-badge span{color:var(--accent2)}
+    .app-layout{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+    .composer{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:2rem}
+    .composer-header{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem}
+    .composer input[type="text"]{font-family:var(--font-display);font-size:1.2rem;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;padding:.5rem 0;margin-bottom:.75rem}
+    .composer textarea{background:transparent;border:none;resize:vertical;min-height:100px;border-bottom:1px solid var(--border);border-radius:0;padding:.5rem 0;margin-bottom:1rem}
+    .composer-footer{display:flex;justify-content:flex-end}
+    .feed-label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+    .post-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1rem;transition:border-color .2s}
+    .post-card:hover{border-color:#3a3a3a}
+    .post-meta{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+    .post-alias{font-family:var(--font-mono);font-size:.75rem;color:var(--accent2);font-weight:500}
+    .post-date{font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted)}
+    .post-title{font-family:var(--font-display);font-size:1.35rem;font-weight:700;color:var(--text);margin-bottom:.5rem;line-height:1.3}
+    .post-body{color:var(--text-dim);font-size:.9rem;line-height:1.7;margin-bottom:1rem;white-space:pre-wrap}
+    .post-footer{display:flex;align-items:center;justify-content:space-between}
+    .push-btn{display:flex;align-items:center;gap:.5rem;background:none;border:1px solid var(--border);border-radius:20px;padding:.35rem .9rem;color:var(--text-muted);font-family:var(--font-mono);font-size:.7rem;cursor:pointer;transition:all .2s}
+    .push-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+    .push-btn.pushed{background:rgba(200,169,110,.1);border-color:var(--accent2);color:var(--accent2)}
+    .edit-btn{background:none;border:1px solid var(--border);border-radius:4px;padding:.3rem .6rem;color:var(--text-muted);font-family:var(--font-mono);font-size:.65rem;cursor:pointer;transition:all .2s}
+    .edit-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1.5rem}
+    .modal-overlay.show{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:2rem;width:100%;max-width:560px;display:flex;flex-direction:column;gap:1rem}
+    .modal-title{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)}
+    .modal-actions{display:flex;gap:.75rem;justify-content:flex-end}
+    .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
+    .empty-state .empty-icon{font-size:2.5rem;margin-bottom:1rem;opacity:.3}
+    .empty-state p{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em}
+    .loading{text-align:center;padding:2rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted)}
+    #toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.75rem 1.25rem;font-family:var(--font-mono);font-size:.75rem;color:var(--accent);z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none}
+    #toast.show{transform:translateY(0);opacity:1}
+    @media(max-width:480px){.app-header{padding:0 1rem}.app-layout{padding:1rem}}
+  </style>
+</head>
+<body>
+
+<div id="auth-view" class="view">
+  <div class="auth-container">
+    <div class="auth-logo">
+      <h1>Letter Me</h1>
+      <p>Write. Share. Push ideas.</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Ingresar</button>
+      <button class="auth-tab" onclick="switchTab('register')">Crear cuenta</button>
+    </div>
+    <form class="auth-form active" id="login-form" onsubmit="handleLogin(event)">
+      <div class="field-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com" required />
+      </div>
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" required />
+      </div>
+      <div class="error-msg" id="login-error"></div>
+      <button type="submit" class="btn btn-primary">Ingresar</button>
+    </form>
+    <form class="auth-form" id="register-form" onsubmit="handleRegister(event)">
+      <div class="field-group">
+        <label>Alias (nombre público)</label>
+        <input type="text" id="reg-alias" placeholder="tu_alias" required minlength="3" />
+      </div>
+      <div class="field-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tu@correo.com" required />
+      </div>
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-password" placeholder="mínimo 6 caracteres" required minlength="6" />
+      </div>
+      <div class="error-msg" id="register-error"></div>
+      <button type="submit" class="btn btn-primary">Crear cuenta</button>
+    </form>
+  </div>
+</div>
+
+<div id="app-view" class="view">
+  <header class="app-header">
+    <div class="header-logo">Letter Me</div>
+    <div class="header-right">
+      <div class="user-badge">Hola, <span id="header-alias">—</span></div>
+      <button class="btn btn-ghost" onclick="handleLogout()">Salir</button>
+    </div>
+  </header>
+  <main class="app-layout">
+    <div class="composer">
+      <div class="composer-header">✦ Nuevo artículo</div>
+      <input type="text" id="post-title" placeholder="Título del artículo..." />
+      <textarea id="post-body" placeholder="Escribe tu artículo aquí..."></textarea>
+      <div class="composer-footer">
+        <button class="btn btn-primary" onclick="publishPost()">Publicar</button>
+      </div>
+    </div>
+    <div class="feed-label">— Artículos recientes</div>
+    <div id="feed"><div class="loading">Cargando...</div></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">✦ Editar artículo</div>
+    <input type="text" id="edit-title" placeholder="Título..." />
+    <textarea id="edit-body" placeholder="Contenido..." style="min-height:150px;resize:vertical;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-danger"  onclick="deletePost()">Eliminar</button>
+      <button class="btn btn-ghost"   onclick="closeEditModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  // ✅ Credenciales de tu proyecto Supabase ya configuradas
+  const SUPABASE_URL = 'https://ykijutktwofzzglhdses.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlraWp1dGt0d29menpnbGhkc2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTc3MjksImV4cCI6MjA4ODczMzcyOX0.Qz4iKwhmmoMuev34STFklSg-Aoult9yIFZ-y9U3y3LU';
+
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser  = null;
+  let currentAlias = null;
+  let editingPostId = null;
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      const { data } = await sb.from('profiles').select('alias').eq('id', currentUser.id).single();
+      currentAlias = data?.alias || 'Anónimo';
+      document.getElementById('header-alias').textContent = currentAlias;
+      showView('app');
+      loadFeed();
+    } else {
+      currentUser = null;
+      currentAlias = null;
+      showView('auth');
+    }
+  });
+
+  window.handleRegister = async function(e) {
+    e.preventDefault();
+    const alias    = document.getElementById('reg-alias').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const errEl    = document.getElementById('register-error');
+    errEl.classList.remove('show');
+
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) { errEl.textContent = translateError(error.message); errEl.classList.add('show'); return; }
+
+    const { error: pe } = await sb.from('profiles').insert({ id: data.user.id, alias });
+    if (pe) { errEl.textContent = 'Error al guardar alias: ' + pe.message; errEl.classList.add('show'); return; }
+
+    showToast('¡Bienvenido a Letter Me!');
+  };
+
+  window.handleLogin = async function(e) {
+    e.preventDefault();
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl    = document.getElementById('login-error');
+    errEl.classList.remove('show');
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { errEl.textContent = translateError(error.message); errEl.classList.add('show'); }
+  };
+
+  window.handleLogout = () => sb.auth.signOut();
+
+  window.publishPost = async function() {
+    const title = document.getElementById('post-title').value.trim();
+    const body  = document.getElementById('post-body').value.trim();
+    if (!title || !body) { showToast('Título y contenido requeridos'); return; }
+
+    const { error } = await sb.from('posts').insert({
+      user_id: currentUser.id, alias: currentAlias, title, body
+    });
+    if (error) { showToast('Error: ' + error.message); return; }
+
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-body').value  = '';
+    showToast('Artículo publicado ✓');
+    loadFeed();
+  };
+
+  async function loadFeed() {
+    const feedEl = document.getElementById('feed');
+    feedEl.innerHTML = '<div class="loading">Cargando artículos...</div>';
+
+    const { data: posts, error } = await sb
+      .from('posts').select('*').order('created_at', { ascending: false });
+
+    if (error) { feedEl.innerHTML = '<div class="loading">Error al cargar.</div>'; return; }
+
+    if (!posts?.length) {
+      feedEl.innerHTML = `<div class="empty-state"><div class="empty-icon">✦</div><p>Aún no hay artículos. ¡Sé el primero!</p></div>`;
+      return;
+    }
+
+    const { data: myPushs } = await sb.from('pushs').select('post_id').eq('user_id', currentUser.id);
+    const mySet = new Set((myPushs||[]).map(p => p.post_id));
+
+    const { data: allPushs } = await sb.from('pushs').select('post_id');
+    const countMap = {};
+    (allPushs||[]).forEach(p => { countMap[p.post_id] = (countMap[p.post_id]||0) + 1; });
+
+    feedEl.innerHTML = '';
+    posts.forEach(post => {
+      const isOwner   = post.user_id === currentUser.id;
+      const hasPushed = mySet.has(post.id);
+      const pushCount = countMap[post.id] || 0;
+      const fecha     = new Date(post.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+
+      const card = document.createElement('div');
+      card.className = 'post-card';
+      card.innerHTML = `
+        <div class="post-meta">
+          <span class="post-alias">@${esc(post.alias)}</span>
+          <span class="post-date">${fecha}</span>
+        </div>
+        <div class="post-title">${esc(post.title)}</div>
+        <div class="post-body">${esc(post.body)}</div>
+        <div class="post-footer">
+          <button class="push-btn ${hasPushed?'pushed':''}" onclick="togglePush('${post.id}',${hasPushed})">
+            <span>↑</span><span>${pushCount} Push${pushCount!==1?'s':''}</span>
+          </button>
+          <div>${isOwner?`<button class="edit-btn" onclick="openEditModal('${post.id}',\`${escA(post.title)}\`,\`${escA(post.body)}\`)">Editar</button>`:''}</div>
+        </div>`;
+      feedEl.appendChild(card);
+    });
+  }
+
+  window.togglePush = async function(postId, hasPushed) {
+    if (hasPushed) {
+      await sb.from('pushs').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+    } else {
+      await sb.from('pushs').insert({ post_id: postId, user_id: currentUser.id });
+    }
+    loadFeed();
+  };
+
+  window.openEditModal = function(id, title, body) {
+    editingPostId = id;
+    document.getElementById('edit-title').value = title;
+    document.getElementById('edit-body').value  = body;
+    document.getElementById('edit-modal').classList.add('show');
+  };
+  window.closeEditModal = function() {
+    editingPostId = null;
+    document.getElementById('edit-modal').classList.remove('show');
+  };
+  window.saveEdit = async function() {
+    if (!editingPostId) return;
+    const title = document.getElementById('edit-title').value.trim();
+    const body  = document.getElementById('edit-body').value.trim();
+    if (!title || !body) { showToast('Campos requeridos'); return; }
+    const { error } = await sb.from('posts').update({ title, body }).eq('id', editingPostId).eq('user_id', currentUser.id);
+    if (error) { showToast('Error: ' + error.message); return; }
+    closeEditModal(); showToast('Artículo actualizado ✓'); loadFeed();
+  };
+  window.deletePost = async function() {
+    if (!editingPostId || !confirm('¿Eliminar este artículo?')) return;
+    const { error } = await sb.from('posts').delete().eq('id', editingPostId).eq('user_id', currentUser.id);
+    if (error) { showToast('Error: ' + error.message); return; }
+    closeEditModal(); showToast('Artículo eliminado'); loadFeed();
+  };
+
+  function showView(name) {
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById(`${name}-view`).classList.add('active');
+  }
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+    document.querySelectorAll('.auth-form').forEach((f,i)=>f.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  };
+  function showToast(msg) {
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+  }
+  window.showToast = showToast;
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+  function escA(s){return String(s).replace(/`/g,'\\`').replace(/\$/g,'\\$')}
+  function translateError(msg) {
+    if(msg.includes('already registered')||msg.includes('already been registered')) return 'Este correo ya está registrado.';
+    if(msg.includes('Invalid login credentials')) return 'Correo o contraseña incorrectos.';
+    if(msg.includes('Password should be at least')) return 'La contraseña debe tener al menos 6 caracteres.';
+    if(msg.includes('Email not confirmed')) return 'Confirmá tu email antes de ingresar (revisá tu casilla).';
+    return msg;
+  }
+</script>
+</body>
+</html>
