@@ -71,18 +71,20 @@
     .lobby-title{font-family:var(--font-display);font-size:1.7rem;font-weight:800;letter-spacing:-.5px;margin-bottom:1.5rem}
     .lobby-title span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-    .post-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:1.4rem 1.5rem;margin-bottom:1rem;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer}
-    .post-card:hover{border-color:var(--orange2);box-shadow:var(--shadow);transform:translateY(-2px)}
-    .post-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap}
-    .alias-badge{font-family:var(--font-mono);font-size:.7rem;font-weight:500;color:#fff;background:var(--grad);padding:.2rem .65rem;border-radius:20px}
-    .post-date{font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted)}
-    .post-title-card{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.4rem;line-height:1.3}
-    .post-preview{color:var(--text-dim);font-size:.88rem;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:.9rem;flex-wrap:wrap;gap:.4rem}
-    .push-pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;font-weight:500;color:var(--text-muted);background:var(--bg);border:1.5px solid var(--border2);border-radius:20px;padding:.25rem .7rem}
+    .post-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:.85rem 1.1rem;margin-bottom:.55rem;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.04);cursor:pointer;display:flex;align-items:center;gap:.85rem}
+    .post-card:hover{border-color:var(--orange2);box-shadow:var(--shadow);transform:translateY(-1px)}
+    .post-card-left{flex:1;min-width:0}
+    .post-meta{display:flex;align-items:center;gap:.45rem;margin-bottom:.3rem;flex-wrap:wrap}
+    .alias-badge{font-family:var(--font-mono);font-size:.62rem;font-weight:500;color:#fff;background:var(--grad);padding:.15rem .5rem;border-radius:20px}
+    .post-date{font-family:var(--font-mono);font-size:.6rem;color:var(--text-muted)}
+    .post-title-card{font-family:var(--font-display);font-size:.95rem;font-weight:700;color:var(--text);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .post-preview{display:none}
+    .card-footer{display:none}
+    .post-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0}
+    .push-pill{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:500;color:var(--text-muted);background:var(--bg);border:1.5px solid var(--border2);border-radius:20px;padding:.18rem .55rem}
     .push-pill.pushed{color:var(--orange);border-color:var(--orange);background:rgba(244,99,42,.06)}
-    .comm-count{font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted)}
-    .read-more{font-size:.78rem;color:var(--orange);font-weight:600}
+    .comm-count{font-family:var(--font-mono);font-size:.6rem;color:var(--text-muted)}
+    .read-more{font-size:.7rem;color:var(--orange);font-weight:600}
 
     .back-btn{display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:600;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:.4rem .5rem;border-radius:8px;margin-bottom:1.5rem;transition:all .2s}
     .back-btn:hover{color:var(--orange);background:rgba(244,99,42,.06)}
@@ -90,6 +92,18 @@
     .detail-title{font-family:var(--font-display);font-size:1.75rem;font-weight:800;letter-spacing:-.5px;margin-bottom:1rem;line-height:1.2}
     .detail-body{font-size:.98rem;line-height:1.85;color:var(--text-dim)}
     .detail-body b,.detail-body strong{color:var(--text);font-weight:700}
+    .detail-body img{max-width:100%;width:100%;border-radius:10px;margin:.75rem 0;display:block;object-fit:cover}
+    /* Image in editor */
+    #editor-body img{max-width:100%;width:100%;border-radius:8px;margin:.5rem 0;display:block;object-fit:cover}
+    /* Image modal */
+    .img-modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,21,16,.5);backdrop-filter:blur(6px);z-index:400;align-items:center;justify-content:center;padding:1.5rem}
+    .img-modal-overlay.open{display:flex}
+    .img-modal-box{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:1.75rem;width:100%;max-width:420px;display:flex;flex-direction:column;gap:1rem;box-shadow:var(--shadow-lg)}
+    .img-modal-box h3{font-family:var(--font-display);font-size:1.05rem;font-weight:700}
+    .img-preview{width:100%;max-height:180px;object-fit:cover;border-radius:10px;display:none;margin-top:.25rem}
+    /* Alias edit in profile */
+    .alias-edit-row{display:flex;gap:.6rem;align-items:center;margin-top:.5rem}
+    .alias-edit-row input{font-family:var(--font-mono);font-size:.85rem;padding:.45rem .75rem;border-radius:8px}
     .detail-actions{display:flex;align-items:center;gap:.75rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);flex-wrap:wrap}
     .push-btn-lg{display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1.5px solid var(--border2);border-radius:20px;padding:.5rem 1.2rem;color:var(--text-muted);font-family:var(--font-body);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
     .push-btn-lg:hover{border-color:var(--orange);color:var(--orange)}
@@ -250,6 +264,8 @@
         <button class="tb-btn" id="tb-left">⬅</button>
         <button class="tb-btn" id="tb-center">⊟</button>
         <button class="tb-btn" id="tb-list">☰</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" id="tb-image" title="Insertar imagen" style="font-size:1rem">🖼</button>
       </div>
       <input type="text" id="editor-title-input" placeholder="Título del artículo..."/>
       <div id="editor-body" contenteditable="true" data-placeholder="Escribí tu artículo aquí..."></div>
@@ -265,6 +281,10 @@
       <div class="p-avatar" id="p-avatar">?</div>
       <div class="p-info">
         <h2 id="p-alias">—</h2><p id="p-email">—</p>
+        <div class="alias-edit-row">
+          <input type="text" id="p-alias-input" placeholder="Nuevo alias" style="width:140px"/>
+          <button class="btn btn-primary btn-sm" id="btn-save-alias">Guardar alias</button>
+        </div>
         <div class="p-stats">
           <div class="stat"><span class="stat-n" id="s-posts">0</span><span class="stat-l">Posts</span></div>
           <div class="stat"><span class="stat-n" id="s-pushs">0</span><span class="stat-l">Pushs</span></div>
@@ -284,6 +304,21 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-cancel-del">Cancelar</button>
       <button class="btn btn-danger" id="btn-confirm-del">Eliminar</button>
+    </div>
+  </div>
+</div>
+<!-- Modal insertar imagen -->
+<div class="img-modal-overlay" id="img-modal">
+  <div class="img-modal-box">
+    <h3>🖼 Insertar imagen</h3>
+    <div class="field-group">
+      <label>URL de la imagen</label>
+      <input type="text" id="img-url-input" placeholder="https://ejemplo.com/imagen.jpg"/>
+    </div>
+    <img id="img-preview" class="img-preview" alt="Vista previa"/>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-img-cancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="btn-img-insert">Colocar imagen</button>
     </div>
   </div>
 </div>
@@ -478,13 +513,13 @@ window.addEventListener('load', function() {
           var card    = document.createElement('div');
           card.className = 'post-card';
           card.innerHTML =
-            '<div class="post-meta"><span class="alias-badge">@' + esc(post.alias) + '</span><span class="post-date">' + fdate(post.created_at) + '</span></div>' +
-            '<div class="post-title-card">' + esc(post.title) + '</div>' +
-            '<div class="post-preview">' + esc(preview) + (preview.length === 150 ? '…' : '') + '</div>' +
-            '<div class="card-footer">' +
-              '<span class="push-pill ' + (pushed ? 'pushed' : '') + '">↑ ' + pc + ' Push' + (pc !== 1 ? 's' : '') + '</span>' +
+            '<div class="post-card-left">' +
+              '<div class="post-meta"><span class="alias-badge">@' + esc(post.alias) + '</span><span class="post-date">' + fdate(post.created_at) + '</span></div>' +
+              '<div class="post-title-card">' + esc(post.title) + '</div>' +
+            '</div>' +
+            '<div class="post-card-right">' +
+              '<span class="push-pill ' + (pushed ? 'pushed' : '') + '">↑ ' + pc + '</span>' +
               '<span class="comm-count">💬 ' + cc + '</span>' +
-              '<span class="read-more">Leer →</span>' +
             '</div>';
           (function(pid){ card.addEventListener('click', function(){ goTo('detail', pid); }); })(post.id);
           el.appendChild(card);
@@ -597,6 +632,73 @@ window.addEventListener('load', function() {
   document.getElementById('tb-size').addEventListener('change',  function(){ if(this.value) fmt('fontSize', this.value); this.selectedIndex = 0; });
   document.getElementById('tb-emoji').addEventListener('click',  function(e){ e.stopPropagation(); document.getElementById('emoji-panel').classList.toggle('open'); });
 
+  // ── IMAGEN EN EDITOR ──────────────────────
+  var savedRange = null; // guarda posición del cursor antes de abrir el modal
+
+  document.getElementById('tb-image').addEventListener('click', function(){
+    // Guardar cursor actual
+    var sel = window.getSelection();
+    if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+    document.getElementById('img-url-input').value = '';
+    document.getElementById('img-preview').style.display = 'none';
+    document.getElementById('img-modal').classList.add('open');
+  });
+
+  document.getElementById('img-url-input').addEventListener('input', function(){
+    var url = this.value.trim();
+    var prev = document.getElementById('img-preview');
+    if (url) {
+      prev.src = url;
+      prev.style.display = 'block';
+      prev.onerror = function(){ prev.style.display = 'none'; };
+    } else {
+      prev.style.display = 'none';
+    }
+  });
+
+  document.getElementById('btn-img-cancel').addEventListener('click', function(){
+    document.getElementById('img-modal').classList.remove('open');
+  });
+
+  document.getElementById('btn-img-insert').addEventListener('click', function(){
+    var url = document.getElementById('img-url-input').value.trim();
+    if (!url) { toast('Ingresá una URL de imagen'); return; }
+    var editorBody = document.getElementById('editor-body');
+    editorBody.focus();
+    // Restaurar cursor guardado
+    if (savedRange) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+    }
+    var img = document.createElement('img');
+    img.src = url;
+    img.style.maxWidth = '100%';
+    img.style.width = '100%';
+    img.style.borderRadius = '8px';
+    img.style.margin = '.5rem 0';
+    img.style.display = 'block';
+    var sel2 = window.getSelection();
+    if (sel2 && sel2.rangeCount) {
+      var range = sel2.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(img);
+      range.setStartAfter(img);
+      range.collapse(true);
+      sel2.removeAllRanges();
+      sel2.addRange(range);
+    } else {
+      editorBody.appendChild(img);
+    }
+    document.getElementById('img-modal').classList.remove('open');
+    savedRange = null;
+  });
+
+  // Cerrar modal imagen con Escape
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') document.getElementById('img-modal').classList.remove('open');
+  });
+
   document.getElementById('btn-save-post').addEventListener('click', function(){
     var title = document.getElementById('editor-title-input').value.trim();
     var body  = document.getElementById('editor-body').innerHTML.trim();
@@ -634,6 +736,7 @@ window.addEventListener('load', function() {
     document.getElementById('p-alias').textContent  = '@' + alias;
     document.getElementById('p-email').textContent  = user.email;
     document.getElementById('p-avatar').textContent = alias[0].toUpperCase();
+    document.getElementById('p-alias-input').value  = alias;
     var listEl = document.getElementById('my-posts-list');
     listEl.innerHTML = '<div class="loading">Cargando...</div>';
     sb.from('posts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(function(r) {
@@ -687,6 +790,22 @@ window.addEventListener('load', function() {
       });
     });
   }
+
+  // ── CAMBIAR ALIAS ─────────────────────────
+  document.getElementById('btn-save-alias').addEventListener('click', function(){
+    var newAlias = document.getElementById('p-alias-input').value.trim();
+    if (!newAlias || newAlias.length < 3) { toast('El alias debe tener al menos 3 caracteres'); return; }
+    if (newAlias === alias) { toast('Es el mismo alias actual'); return; }
+    sb.from('profiles').update({ alias: newAlias }).eq('id', user.id).then(function(r){
+      if (r.error) { toast('Error: ' + r.error.message); return; }
+      alias = newAlias;
+      document.getElementById('p-alias').textContent  = '@' + alias;
+      document.getElementById('p-avatar').textContent = alias[0].toUpperCase();
+      document.getElementById('nav-alias').textContent = '@' + alias;
+      document.getElementById('c-avatar').textContent  = alias[0].toUpperCase();
+      toast('¡Alias actualizado a @' + alias + '!');
+    });
+  });
 
 }); // fin window.load
 </script>
