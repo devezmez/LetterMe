@@ -219,7 +219,7 @@
     .loading{text-align:center;padding:1.65rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted)}
 
     /* ── VERSION FOOTER ── */
-    .app-footer{text-align:center;padding:1.25rem 1rem 2rem;font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);opacity:.45;line-height:2;border-top:1px solid var(--border);margin-top:2rem}
+    .app-footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:.45rem 1rem;font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);opacity:.45;background:var(--bg);border-top:1px solid var(--border);z-index:50;pointer-events:none}
 
     /* ── RESPONSIVE ── */
     @media(max-width:640px){
@@ -239,7 +239,7 @@
       .editor-toolbar{gap:.1rem;padding:.46rem .7rem}
       .modal-box,.img-modal-box{padding:1.3rem}
       body[data-view="expanded"] .post-card{padding:.9rem .95rem}
-      .app-footer{font-size:.52rem;padding:.9rem .75rem 1.5rem}
+      .app-footer{font-size:.52rem}
     }
     @media(max-width:380px){
       .auth-logo h1{font-size:2.4rem}
@@ -422,10 +422,8 @@ window.addEventListener('load', function() {
     { v:'v2.2', desc:'Modo oscuro · Vista compacta/expandida · Responsivo total' }
   ];
   (function(){
-    var el = document.getElementById('app-footer');
-    el.innerHTML = VERSIONS.map(function(x){
-      return '<span style="margin:0 .6rem"><b>'+x.v+'</b> — '+x.desc+'</span>';
-    }).join('<span style="opacity:.35"> · </span>');
+    var latest = VERSIONS[VERSIONS.length - 1];
+    document.getElementById('app-footer').textContent = latest.v + ' — ' + latest.desc;
   })();
 
   // ── SUPABASE ─────────────────────────────
