@@ -349,6 +349,7 @@
         <button class="tb-btn" id="tb-list" title="Lista">☰</button>
         <div class="tb-sep"></div>
         <button class="tb-btn" id="tb-image" title="Imagen" style="font-size:.9rem">🖼</button>
+        <button class="tb-btn" id="tb-link" title="Insertar link" style="font-size:.9rem">🔗</button>
       </div>
       <input type="text" id="editor-title-input" placeholder="Título del artículo..."/>
       <div id="editor-body" contenteditable="true" data-placeholder="Escribí tu artículo aquí..."></div>
@@ -412,6 +413,24 @@
   </div>
 </div>
 
+<!-- Modal link -->
+<div class="img-modal-overlay" id="link-modal">
+  <div class="img-modal-box">
+    <h3>🔗 Insertar link</h3>
+    <div class="field-group">
+      <label>Texto del link</label>
+      <input type="text" id="link-text-input" placeholder="Ej: Ver artículo completo"/>
+    </div>
+    <div class="field-group">
+      <label>URL</label>
+      <input type="text" id="link-url-input" placeholder="https://ejemplo.com"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-link-cancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="btn-link-insert">Colocar link</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -737,6 +756,41 @@ window.addEventListener('load', function() {
     else prev.style.display='none';
   });
   document.getElementById('btn-img-cancel').addEventListener('click',function(){ document.getElementById('img-modal').classList.remove('open'); });
+  // ── LINK EN EDITOR ──────────────────────
+  var savedRangeLink=null;
+  document.getElementById('tb-link').addEventListener('click',function(){
+    var sel=window.getSelection();
+    if(sel&&sel.rangeCount) savedRangeLink=sel.getRangeAt(0).cloneRange();
+    // Pre-fill text with selected text if any
+    var selectedText = sel&&sel.rangeCount ? sel.toString() : '';
+    document.getElementById('link-text-input').value=selectedText;
+    document.getElementById('link-url-input').value='';
+    document.getElementById('link-modal').classList.add('open');
+    setTimeout(function(){
+      var inp = selectedText ? document.getElementById('link-url-input') : document.getElementById('link-text-input');
+      inp.focus();
+    },50);
+  });
+  document.getElementById('btn-link-cancel').addEventListener('click',function(){ document.getElementById('link-modal').classList.remove('open'); });
+  document.getElementById('btn-link-insert').addEventListener('click',function(){
+    var text=document.getElementById('link-text-input').value.trim();
+    var url=document.getElementById('link-url-input').value.trim();
+    if(!url){ toast('Ingresá una URL'); return; }
+    if(!text) text=url;
+    var eb=document.getElementById('editor-body'); eb.focus();
+    if(savedRangeLink){ var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRangeLink); }
+    var a=document.createElement('a');
+    a.href=url; a.textContent=text;
+    a.target='_blank'; a.rel='noopener noreferrer';
+    a.style.cssText='color:var(--orange);text-decoration:underline';
+    var sel2=window.getSelection();
+    if(sel2&&sel2.rangeCount){
+      var range=sel2.getRangeAt(0); range.deleteContents(); range.insertNode(a);
+      range.setStartAfter(a); range.collapse(true); sel2.removeAllRanges(); sel2.addRange(range);
+    } else eb.appendChild(a);
+    document.getElementById('link-modal').classList.remove('open'); savedRangeLink=null;
+  });
+
   document.getElementById('btn-img-insert').addEventListener('click',function(){
     var url=document.getElementById('img-url-input').value.trim();
     if(!url){ toast('Ingresá una URL de imagen'); return; }
@@ -857,6 +911,7 @@ window.addEventListener('load', function() {
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){
       document.getElementById('img-modal').classList.remove('open');
+      document.getElementById('link-modal').classList.remove('open');
       document.getElementById('del-modal').classList.remove('open');
     }
   });
