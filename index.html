@@ -129,6 +129,8 @@
     .detail-title{font-family:var(--font-display);font-size:1.6rem;font-weight:800;letter-spacing:-.5px;margin-bottom:.9rem;line-height:1.2}
     .detail-body{font-size:.95rem;line-height:1.85;color:var(--text-dim)}
     .detail-body b,.detail-body strong{color:var(--text);font-weight:700}
+    .detail-body a{color:var(--orange);text-decoration:underline;word-break:break-all}
+    .detail-body a:hover{opacity:.75}
     .detail-body img{max-width:100%;width:100%;border-radius:10px;margin:.75rem 0;display:block;object-fit:cover}
     .detail-actions{display:flex;align-items:center;gap:.62rem;margin-top:1.35rem;padding-top:1.35rem;border-top:1px solid var(--border);flex-wrap:wrap}
     .push-btn-lg{display:flex;align-items:center;gap:.42rem;background:var(--bg);border:1.5px solid var(--border2);border-radius:20px;padding:.44rem 1.1rem;color:var(--text-muted);font-family:var(--font-body);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
@@ -423,7 +425,7 @@ window.addEventListener('load', function() {
   ];
   (function(){
     var latest = VERSIONS[VERSIONS.length - 1];
-    document.getElementById('app-footer').textContent = latest.v + ' — ' + latest.desc;
+    document.getElementById('app-footer').textContent = latest.v;
   })();
 
   // ── SUPABASE ─────────────────────────────
@@ -661,6 +663,11 @@ window.addEventListener('load', function() {
             deletingId=post.id; document.getElementById('del-modal').classList.add('open');
           });
         }
+        // Make all links open in new tab
+        document.getElementById('detail-content').querySelectorAll('a').forEach(function(a){
+          a.setAttribute('target','_blank');
+          a.setAttribute('rel','noopener noreferrer');
+        });
         loadComments(postId);
       });
     });
