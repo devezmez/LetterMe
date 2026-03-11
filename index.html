@@ -257,6 +257,39 @@
     /* VERSION FOOTER */
     .app-footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:.45rem 1rem;font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);opacity:.45;background:var(--bg);border-top:1px solid var(--border);z-index:50;pointer-events:none}
 
+
+    /* TAGS */
+    .tag-badge{display:inline-flex;align-items:center;gap:.22rem;font-family:var(--font-mono);font-size:.58rem;font-weight:600;padding:.14rem .52rem;border-radius:20px;letter-spacing:.02em;flex-shrink:0}
+    .tag-Musica   {background:rgba(168,85,247,.15);color:#a855f7;border:1px solid rgba(168,85,247,.3)}
+    .tag-Arte     {background:rgba(236,72,153,.15);color:#ec4899;border:1px solid rgba(236,72,153,.3)}
+    .tag-Deporte  {background:rgba(34,197,94,.15);color:#16a34a;border:1px solid rgba(34,197,94,.3)}
+    .tag-General  {background:rgba(99,102,241,.15);color:#6366f1;border:1px solid rgba(99,102,241,.3)}
+    .tag-Tecnologia{background:rgba(6,182,212,.15);color:#0891b2;border:1px solid rgba(6,182,212,.3)}
+    .tag-OffTopic {background:rgba(245,158,11,.15);color:#d97706;border:1px solid rgba(245,158,11,.3)}
+    body.dark .tag-Musica   {background:rgba(168,85,247,.22);color:#c084fc}
+    body.dark .tag-Arte     {background:rgba(236,72,153,.22);color:#f472b6}
+    body.dark .tag-Deporte  {background:rgba(34,197,94,.22);color:#4ade80}
+    body.dark .tag-General  {background:rgba(99,102,241,.22);color:#818cf8}
+    body.dark .tag-Tecnologia{background:rgba(6,182,212,.22);color:#22d3ee}
+    body.dark .tag-OffTopic {background:rgba(245,158,11,.22);color:#fbbf24}
+
+    /* TAG SELECTOR in editor footer */
+    .tag-select-wrap{display:flex;align-items:center;gap:.4rem}
+    .tag-select-wrap label{font-size:.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;margin:0}
+    #editor-tag{padding:.3rem .55rem;border:1.5px solid var(--border2);border-radius:8px;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);background:var(--bg);cursor:pointer;outline:none;max-width:110px}
+
+    /* FILTER SECTION in sidebar */
+    .filter-sep{height:1px;background:var(--border);margin:1rem 0}
+    .filter-title{font-family:var(--font-display);font-size:.85rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.75rem;text-align:center}
+    .filter-tags{display:flex;flex-direction:column;gap:.35rem}
+    .filter-tag-btn{display:flex;align-items:center;gap:.5rem;padding:.42rem .65rem;border-radius:10px;border:1.5px solid transparent;background:none;cursor:pointer;font-family:var(--font-body);font-size:.78rem;font-weight:500;color:var(--text-dim);transition:all .2s;text-align:left;width:100%}
+    .filter-tag-btn:hover{background:var(--bg);border-color:var(--border2)}
+    .filter-tag-btn.active{background:var(--bg);border-color:var(--border2);font-weight:700;color:var(--text)}
+    .filter-count{font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);margin-left:auto}
+    .filter-clear{display:flex;align-items:center;justify-content:center;gap:.35rem;margin-top:.6rem;padding:.38rem;border-radius:8px;border:1.5px dashed var(--border2);background:none;cursor:pointer;font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);transition:all .2s;width:100%}
+    .filter-clear:hover{border-color:var(--orange);color:var(--orange)}
+    .filter-clear.hidden{display:none}
+
     /* RESPONSIVE */
     @media(max-width:860px){
       .lobby-outer{grid-template-columns:1fr;gap:1.1rem}
@@ -293,6 +326,12 @@
       .nav-btn{padding:.28rem .42rem}
       .p-stats{gap:.85rem}
       .podium-alias{font-size:.55rem}
+    }
+    @media(max-width:860px){
+      .filter-tags{flex-direction:row;flex-wrap:wrap;gap:.3rem}
+      .filter-tag-btn{width:auto;padding:.3rem .55rem;font-size:.72rem}
+      .filter-count{display:none}
+      .filter-clear{width:auto;padding:.3rem .65rem}
     }
   </style>
 </head>
@@ -349,6 +388,17 @@
         <div class="podium-list" id="podium-list">
           <div class="loading" style="padding:.8rem;font-size:.62rem">Cargando...</div>
         </div>
+        <div class="filter-sep"></div>
+        <div class="filter-title">🏷 Temas</div>
+        <div class="filter-tags" id="filter-tags">
+          <button class="filter-tag-btn" data-tag="Musica"><span class="tag-badge tag-Musica">🎵 Música</span><span class="filter-count" id="fc-Musica">0</span></button>
+          <button class="filter-tag-btn" data-tag="Arte"><span class="tag-badge tag-Arte">🎨 Arte</span><span class="filter-count" id="fc-Arte">0</span></button>
+          <button class="filter-tag-btn" data-tag="Deporte"><span class="tag-badge tag-Deporte">⚽ Deporte</span><span class="filter-count" id="fc-Deporte">0</span></button>
+          <button class="filter-tag-btn" data-tag="General"><span class="tag-badge tag-General">💬 General</span><span class="filter-count" id="fc-General">0</span></button>
+          <button class="filter-tag-btn" data-tag="Tecnologia"><span class="tag-badge tag-Tecnologia">💻 Tecnología</span><span class="filter-count" id="fc-Tecnologia">0</span></button>
+          <button class="filter-tag-btn" data-tag="OffTopic"><span class="tag-badge tag-OffTopic">🌀 Off Topic</span><span class="filter-count" id="fc-OffTopic">0</span></button>
+        </div>
+        <button class="filter-clear hidden" id="btn-filter-clear">✕ Ver todos los temas</button>
       </aside>
       <!-- FEED -->
       <div class="lobby-main">
@@ -415,6 +465,17 @@
         <div class="vis-toggle">
           <button class="vis-btn active-pub" id="vis-public">🌐 Público</button>
           <button class="vis-btn" id="vis-private">🔒 Privado</button>
+        </div>
+        <div class="tag-select-wrap">
+          <label>Tema</label>
+          <select id="editor-tag">
+            <option value="Musica">🎵 Música</option>
+            <option value="Arte">🎨 Arte</option>
+            <option value="Deporte">⚽ Deporte</option>
+            <option value="General" selected>💬 General</option>
+            <option value="Tecnologia">💻 Tecnología</option>
+            <option value="OffTopic">🌀 Off Topic</option>
+          </select>
         </div>
         <div class="editor-footer-right">
           <button class="btn btn-ghost btn-sm" id="btn-cancel-edit">Cancelar</button>
@@ -505,7 +566,8 @@ window.addEventListener('load', function() {
     { v:'v2.0', desc:'Lanzamiento inicial' },
     { v:'v2.1', desc:'Imágenes · Cambio de alias · Cards compactas' },
     { v:'v2.2', desc:'Modo oscuro · Vista compacta/expandida · Responsivo total' },
-    { v:'v2.3', desc:'Posts privados · Ranking podio · Layout sidebar' }
+    { v:'v2.3', desc:'Posts privados · Ranking podio · Layout sidebar' },
+    { v:'v2.4', desc:'Etiquetas de tema · Filtro por tema · Tag badges' }
   ];
   document.getElementById('app-footer').textContent = VERSIONS[VERSIONS.length-1].v;
 
@@ -518,6 +580,21 @@ window.addEventListener('load', function() {
   // ── ESTADO ───────────────────────────────
   var user=null, alias=null, editingId=null, deletingId=null, detailId=null;
   var isPublic=true; // visibilidad del editor
+  var activeTag=null; // filtro activo de tema
+
+  var TAGS={
+    Musica:    {label:'🎵 Música',    cls:'tag-Musica'},
+    Arte:      {label:'🎨 Arte',      cls:'tag-Arte'},
+    Deporte:   {label:'⚽ Deporte',   cls:'tag-Deporte'},
+    General:   {label:'💬 General',   cls:'tag-General'},
+    Tecnologia:{label:'💻 Tecnología',cls:'tag-Tecnologia'},
+    OffTopic:  {label:'🌀 Off Topic', cls:'tag-OffTopic'}
+  };
+  function tagBadge(tag){
+    var t=TAGS[tag]||TAGS['General'];
+    return '<span class="tag-badge '+t.cls+'">'+t.label+'</span>';
+  }
+
   var EMOJIS=['😀','😂','🥰','😎','🤔','😢','🔥','❤️','👍','👏','🎉','✨','💡','📝','🚀','💬','🌟','😅','🤣','😍','🥳','😤','💪','🙌','✅','⚡','🎯','💥','🌈','🍀','🦋','🎵','🍕','☀️','🌙'];
   var MEDALS = ['💎','🥇','🥈','🥉','⬜'];
   var RANK_LABELS = ['Diamante','Oro','Plata','Bronce','Hierro'];
@@ -545,6 +622,21 @@ window.addEventListener('load', function() {
   (function(){ var s='compact'; try{s=localStorage.getItem(VIEW_KEY)||'compact';}catch(e){} applyView(s); })();
   document.getElementById('vt-compact').addEventListener('click',function(){ applyView('compact'); });
   document.getElementById('vt-expanded').addEventListener('click',function(){ applyView('expanded'); });
+
+  // ── FILTER BY TAG ─────────────────────────
+  function applyTagFilter(tag){
+    activeTag=tag;
+    document.querySelectorAll('.filter-tag-btn').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-tag')===tag);
+    });
+    var clearBtn=document.getElementById('btn-filter-clear');
+    clearBtn.classList.toggle('hidden', !tag);
+    loadLobby();
+  }
+  document.querySelectorAll('.filter-tag-btn').forEach(function(b){
+    b.addEventListener('click',function(){ applyTagFilter(this.getAttribute('data-tag')); });
+  });
+  document.getElementById('btn-filter-clear').addEventListener('click',function(){ applyTagFilter(null); });
 
   // ── VISIBILITY TOGGLE (editor) ───────────
   function setVisibility(pub){
@@ -630,6 +722,7 @@ window.addEventListener('load', function() {
     document.getElementById('editor-title-input').value='';
     document.getElementById('editor-body').innerHTML='';
     setVisibility(true);
+    document.getElementById('editor-tag').value='General';
     goTo('editor');
   });
   document.getElementById('btn-back').addEventListener('click',   function(){ goTo('lobby'); });
@@ -725,10 +818,24 @@ window.addEventListener('load', function() {
   function loadLobby(){
     var el=document.getElementById('lobby-feed');
     el.innerHTML='<div class="loading">Cargando posts...</div>';
-    // Solo posts públicos — más los propios privados del usuario
-    sb.from('posts').select('*').eq('is_public',true).order('created_at',{ascending:false}).then(function(r){
+    var q=sb.from('posts').select('*').eq('is_public',true).order('created_at',{ascending:false});
+    if(activeTag) q=q.eq('tag',activeTag);
+    q.then(function(r){
+      // Also fetch all public posts to build counts (ignoring active filter)
+      sb.from('posts').select('tag').eq('is_public',true).then(function(allR){
+        var allPosts=allR.data||[];
+        var tagCounts={};
+        allPosts.forEach(function(p){ tagCounts[p.tag]=(tagCounts[p.tag]||0)+1; });
+        Object.keys(TAGS).forEach(function(t){
+          var el2=document.getElementById('fc-'+t);
+          if(el2) el2.textContent=tagCounts[t]||0;
+        });
+      });
       var posts=r.data||[];
-      if(!posts.length){ el.innerHTML='<div class="empty-state"><div class="empty-icon">✦</div><p>Nadie escribió todavía. ¡Sé el primero!</p></div>'; return; }
+      if(!posts.length){
+        el.innerHTML='<div class="empty-state"><div class="empty-icon">✦</div><p>'+(activeTag?'No hay posts con este tema todavía.':'Nadie escribió todavía. ¡Sé el primero!')+'</p></div>';
+        return;
+      }
       Promise.all([
         sb.from('pushs').select('post_id').eq('user_id',user.id),
         sb.from('pushs').select('post_id'),
@@ -744,7 +851,7 @@ window.addEventListener('load', function() {
           var card=document.createElement('div'); card.className='post-card';
           card.innerHTML=
             '<div class="post-card-left">'+
-              '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span></div>'+
+              '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+tagBadge(post.tag||'General')+'</div>'+
               '<div class="post-title-card">'+esc(post.title)+'</div>'+
               '<div class="post-preview-text">'+esc(preview)+(preview.length===140?'…':'')+'</div>'+
             '</div>'+
@@ -777,6 +884,7 @@ window.addEventListener('load', function() {
       ]).then(function(pr){
         var hasPushed=!!pr[0].data, pushCount=pr[1].data?pr[1].data.length:0, isOwner=post.user_id===user.id;
         var privLabel=!post.is_public?'<span class="private-badge" style="font-size:.65rem">🔒 Privado</span>':'';
+        var tagLabel=tagBadge(post.tag||'General');
         var ownerBtns=isOwner
           ?'<button class="btn btn-ghost btn-sm" id="detail-edit-btn">✏ Editar</button>'+
             '<button class="btn btn-danger btn-sm" id="detail-del-btn">Eliminar</button>'+
@@ -807,6 +915,7 @@ window.addEventListener('load', function() {
             document.getElementById('editor-title-input').value=post.title;
             document.getElementById('editor-body').innerHTML=post.body;
             setVisibility(post.is_public);
+            document.getElementById('editor-tag').value=post.tag||'General';
             goTo('editor');
           });
           document.getElementById('detail-del-btn').addEventListener('click',function(){
@@ -944,9 +1053,10 @@ window.addEventListener('load', function() {
     var body=document.getElementById('editor-body').innerHTML.trim();
     if(!title){ toast('El título es requerido'); return; }
     if(!body||body==='<br>'){ toast('El contenido es requerido'); return; }
+    var tag=document.getElementById('editor-tag').value||'General';
     var p=editingId
-      ? sb.from('posts').update({title:title,body:body,is_public:isPublic}).eq('id',editingId).eq('user_id',user.id)
-      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic});
+      ? sb.from('posts').update({title:title,body:body,is_public:isPublic,tag:tag}).eq('id',editingId).eq('user_id',user.id)
+      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic,tag:tag});
     p.then(function(r){
       if(r.error){ toast('Error: '+r.error.message); return; }
       toast(editingId?'Artículo actualizado ✓':(isPublic?'¡Artículo publicado!':'Guardado como privado 🔒'));
@@ -1011,6 +1121,7 @@ window.addEventListener('load', function() {
             document.getElementById('editor-title-input').value=pp.title;
             document.getElementById('editor-body').innerHTML=pp.body;
             setVisibility(pp.is_public!==false);
+            document.getElementById('editor-tag').value=pp.tag||'General';
             goTo('editor');
           });
           card.querySelector('.del-btn').addEventListener('click',function(){
