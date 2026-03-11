@@ -726,7 +726,7 @@ window.addEventListener('load', function() {
     var el=document.getElementById('lobby-feed');
     el.innerHTML='<div class="loading">Cargando posts...</div>';
     // Solo posts públicos — más los propios privados del usuario
-    sb.from('posts').select('*').or('is_public.eq.true,user_id.eq.'+user.id).order('created_at',{ascending:false}).then(function(r){
+    sb.from('posts').select('*').eq('is_public',true).order('created_at',{ascending:false}).then(function(r){
       var posts=r.data||[];
       if(!posts.length){ el.innerHTML='<div class="empty-state"><div class="empty-icon">✦</div><p>Nadie escribió todavía. ¡Sé el primero!</p></div>'; return; }
       Promise.all([
@@ -739,18 +739,12 @@ window.addEventListener('load', function() {
         var cCount={}; (results[2].data||[]).forEach(function(c){ cCount[c.post_id]=(cCount[c.post_id]||0)+1; });
         el.innerHTML='';
         posts.forEach(function(post){
-          var isOwn=post.user_id===user.id;
-          var isPriv=!post.is_public;
-          // Skip: posts privados de otros (no debería llegar por la query, pero doble seguro)
-          if(isPriv&&!isOwn) return;
           var pushed=!!mySet[post.id], pc=pCount[post.id]||0, cc=cCount[post.id]||0;
           var preview=(post.body||'').replace(/<[^>]*>/g,'').slice(0,140);
-          var privTag=isPriv?'<span class="private-badge">🔒 Privado</span>':'';
           var card=document.createElement('div'); card.className='post-card';
-          if(isPriv) card.style.opacity='.78';
           card.innerHTML=
             '<div class="post-card-left">'+
-              '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+privTag+'</div>'+
+              '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span></div>'+
               '<div class="post-title-card">'+esc(post.title)+'</div>'+
               '<div class="post-preview-text">'+esc(preview)+(preview.length===140?'…':'')+'</div>'+
             '</div>'+
