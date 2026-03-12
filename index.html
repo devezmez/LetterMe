@@ -348,14 +348,14 @@
       </div>
       <div class="auth-form active" id="login-form">
         <div class="field-group"><label>Correo</label><input type="email" id="login-email" placeholder="tu@correo.com"/></div>
-        <div class="field-group"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••"/></div>
+        <div class="field-group"><label>Contraseña</label><div class="pass-wrap"><input type="password" id="login-pass" placeholder="••••••••"/><button class="eye-btn" data-target="login-pass" type="button">👁</button></div></div>
         <div class="error-msg" id="login-err"></div>
         <button class="btn btn-primary btn-full" id="btn-login">Ingresar →</button>
       </div>
       <div class="auth-form" id="register-form">
         <div class="field-group"><label>Alias</label><input type="text" id="reg-alias" placeholder="tu_alias"/></div>
         <div class="field-group"><label>Correo</label><input type="email" id="reg-email" placeholder="tu@correo.com"/></div>
-        <div class="field-group"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="mínimo 6 caracteres"/></div>
+        <div class="field-group"><label>Contraseña</label><div class="pass-wrap"><input type="password" id="reg-pass" placeholder="mínimo 6 caracteres"/><button class="eye-btn" data-target="reg-pass" type="button">👁</button></div></div>
         <div class="error-msg" id="reg-err"></div>
         <button class="btn btn-primary btn-full" id="btn-register">Crear cuenta →</button>
       </div>
@@ -1166,6 +1166,15 @@ window.addEventListener('load', function() {
       document.getElementById('link-modal').classList.remove('open');
       document.getElementById('del-modal').classList.remove('open');
     }
+  });
+
+  // ── PASSWORD TOGGLE ─────────────────────
+  document.querySelectorAll('.eye-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var inp=document.getElementById(this.getAttribute('data-target'));
+      if(inp.type==='password'){ inp.type='text'; this.textContent='🙈'; }
+      else{ inp.type='password'; this.textContent='👁'; }
+    });
   });
 
 }); // fin window.load
