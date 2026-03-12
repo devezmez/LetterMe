@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Letter Me — Nueva contraseña</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root{
+      --bg:#f7f4f0;--surface:#fff;--border:#ede8e2;--border2:#e2dbd3;
+      --orange:#f4632a;--orange2:#ff8c5a;
+      --grad:linear-gradient(135deg,#f4632a 0%,#ff8c5a 40%,#ffb347 100%);
+      --text:#1a1510;--text-muted:#a0968c;--text-dim:#6b6055;--danger:#e53e3e;--success:#16a34a;
+      --font-display:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
+      --shadow-lg:0 8px 40px rgba(244,99,42,.15);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;position:relative;overflow:hidden}
+    body::before{content:'';position:absolute;width:600px;height:600px;background:var(--grad);border-radius:50%;top:-200px;right:-200px;opacity:.08;filter:blur(80px);pointer-events:none}
+    body::after{content:'';position:absolute;width:400px;height:400px;background:var(--grad);border-radius:50%;bottom:-150px;left:-100px;opacity:.06;filter:blur(60px);pointer-events:none}
+
+    .box{width:100%;max-width:400px;position:relative;z-index:1}
+    .logo{text-align:center;margin-bottom:2rem}
+    .logo h1{font-family:var(--font-display);font-size:2.8rem;font-weight:800;letter-spacing:-2px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .logo p{font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase;margin-top:.35rem}
+
+    .card{background:var(--surface);border-radius:20px;padding:1.75rem;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+    .card h2{font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:.4rem}
+    .card>p{font-size:.83rem;color:var(--text-dim);margin-bottom:1.35rem;line-height:1.55}
+
+    .field-group{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.9rem}
+    label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)}
+    .pass-wrap{position:relative;display:flex;align-items:center}
+    .pass-wrap input{width:100%;padding-right:2.6rem}
+    input[type="password"],input[type="text"]{background:var(--bg);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:.92rem;padding:.7rem .9rem;border-radius:10px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+    input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(244,99,42,.10)}
+    .eye-btn{position:absolute;right:.7rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;padding:0;line-height:1;transition:color .2s;z-index:2}
+    .eye-btn:hover{color:var(--orange)}
+
+    /* strength bar */
+    .strength-wrap{margin-top:.35rem;display:none}
+    .strength-bar{height:4px;border-radius:4px;background:var(--border2);overflow:hidden}
+    .strength-fill{height:100%;width:0%;border-radius:4px;transition:width .3s,background .3s}
+    .strength-label{font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);margin-top:.28rem}
+
+    .err{font-family:var(--font-mono);font-size:.68rem;color:var(--danger);padding:.5rem .7rem;background:rgba(229,62,62,.07);border-radius:8px;border-left:2px solid var(--danger);display:none;margin-bottom:.75rem}
+    .err.show{display:block}
+
+    .btn{width:100%;padding:.72rem;border:none;border-radius:10px;cursor:pointer;font-family:var(--font-body);font-size:.88rem;font-weight:600;background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(244,99,42,.28);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.4rem}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(244,99,42,.38)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+    /* success state */
+    .success-view{display:none;text-align:center;padding:.5rem 0}
+    .success-icon{font-size:3rem;margin-bottom:1rem}
+    .success-view h2{font-family:var(--font-display);font-size:1.2rem;font-weight:800;margin-bottom:.5rem}
+    .success-view p{font-size:.84rem;color:var(--text-dim);margin-bottom:1.35rem;line-height:1.55}
+    .link-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;background:var(--grad);color:#fff;border-radius:10px;font-family:var(--font-body);font-size:.86rem;font-weight:600;text-decoration:none;box-shadow:0 4px 14px rgba(244,99,42,.28);transition:all .2s}
+    .link-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(244,99,42,.38)}
+
+    /* invalid token state */
+    .invalid-view{display:none;text-align:center;padding:.5rem 0}
+    .invalid-icon{font-size:3rem;margin-bottom:1rem}
+    .invalid-view h2{font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-bottom:.5rem;color:var(--danger)}
+    .invalid-view p{font-size:.83rem;color:var(--text-dim);margin-bottom:1.35rem;line-height:1.55}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">
+      <h1>Letter Me</h1>
+      <p>Recuperación de cuenta</p>
+    </div>
+    <div class="card">
+
+      <!-- FORM VIEW -->
+      <div id="form-view">
+        <h2>🔑 Nueva contraseña</h2>
+        <p>Elegí una contraseña nueva y segura para tu cuenta.</p>
+        <div class="field-group">
+          <label>Nueva contraseña</label>
+          <div class="pass-wrap">
+            <input type="password" id="new-pass" placeholder="mínimo 6 caracteres"/>
+            <button class="eye-btn" data-target="new-pass" type="button">👁</button>
+          </div>
+          <div class="strength-wrap" id="strength-wrap">
+            <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+            <div class="strength-label" id="strength-label"></div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Confirmar contraseña</label>
+          <div class="pass-wrap">
+            <input type="password" id="confirm-pass" placeholder="repetí tu contraseña"/>
+            <button class="eye-btn" data-target="confirm-pass" type="button">👁</button>
+          </div>
+        </div>
+        <div class="err" id="form-err"></div>
+        <button class="btn" id="btn-reset">Guardar nueva contraseña →</button>
+      </div>
+
+      <!-- SUCCESS VIEW -->
+      <div class="success-view" id="success-view">
+        <div class="success-icon">✅</div>
+        <h2>¡Contraseña actualizada!</h2>
+        <p>Tu contraseña fue cambiada correctamente. Ya podés ingresar con tu nueva contraseña.</p>
+        <a class="link-btn" href="/">← Ir al inicio</a>
+      </div>
+
+      <!-- INVALID TOKEN VIEW -->
+      <div class="invalid-view" id="invalid-view">
+        <div class="invalid-icon">⚠️</div>
+        <h2>Link inválido o expirado</h2>
+        <p>Este link de recuperación ya fue usado o expiró. Pedí uno nuevo desde la página de inicio.</p>
+        <a class="link-btn" href="/">← Volver al inicio</a>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+window.addEventListener('load', function(){
+
+  var sb = supabase.createClient(
+    'https://ykijutktwofzzglhdses.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlraWp1dGt0d29menpnbGhkc2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTc3MjksImV4cCI6MjA4ODczMzcyOX0.Qz4iKwhmmoMuev34STFklSg-Aoult9yIFZ-y9U3y3LU'
+  );
+
+  // ── DETECTAR TOKEN EN URL ─────────────────
+  // Supabase manda el token como hash: #access_token=...&type=recovery
+  function getHashParams(){
+    var hash = window.location.hash.substring(1);
+    var params = {};
+    hash.split('&').forEach(function(part){
+      var kv = part.split('=');
+      if(kv.length===2) params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+    });
+    return params;
+  }
+
+  var params = getHashParams();
+  var isRecovery = params.type === 'recovery' && params.access_token;
+
+  if(!isRecovery){
+    // No hay token válido
+    document.getElementById('form-view').style.display='none';
+    document.getElementById('invalid-view').style.display='block';
+  } else {
+    // Establecer sesión con el token de recovery
+    sb.auth.setSession({
+      access_token: params.access_token,
+      refresh_token: params.refresh_token || ''
+    }).then(function(res){
+      if(res.error){
+        document.getElementById('form-view').style.display='none';
+        document.getElementById('invalid-view').style.display='block';
+      }
+    });
+  }
+
+  // ── PASSWORD STRENGTH ─────────────────────
+  document.getElementById('new-pass').addEventListener('input', function(){
+    var val = this.value;
+    var wrap = document.getElementById('strength-wrap');
+    var fill = document.getElementById('strength-fill');
+    var lbl  = document.getElementById('strength-label');
+    if(!val){ wrap.style.display='none'; return; }
+    wrap.style.display='block';
+    var score = 0;
+    if(val.length >= 6)  score++;
+    if(val.length >= 10) score++;
+    if(/[A-Z]/.test(val)) score++;
+    if(/[0-9]/.test(val)) score++;
+    if(/[^A-Za-z0-9]/.test(val)) score++;
+    var levels = [
+      {pct:'20%', color:'#ef4444', label:'Muy débil'},
+      {pct:'40%', color:'#f97316', label:'Débil'},
+      {pct:'60%', color:'#eab308', label:'Regular'},
+      {pct:'80%', color:'#22c55e', label:'Buena'},
+      {pct:'100%',color:'#16a34a', label:'Excelente'}
+    ];
+    var lvl = levels[Math.max(0, score-1)] || levels[0];
+    fill.style.width = lvl.pct;
+    fill.style.background = lvl.color;
+    lbl.textContent = lvl.label;
+    lbl.style.color = lvl.color;
+  });
+
+  // ── EYE TOGGLE ───────────────────────────
+  document.querySelectorAll('.eye-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var inp = document.getElementById(this.getAttribute('data-target'));
+      if(inp.type==='password'){ inp.type='text'; this.textContent='🙈'; }
+      else{ inp.type='password'; this.textContent='👁'; }
+    });
+  });
+
+  // ── SUBMIT ───────────────────────────────
+  document.getElementById('btn-reset').addEventListener('click', function(){
+    var pass    = document.getElementById('new-pass').value;
+    var confirm = document.getElementById('confirm-pass').value;
+    var err     = document.getElementById('form-err');
+    err.classList.remove('show');
+
+    if(pass.length < 6){
+      err.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+      err.classList.add('show'); return;
+    }
+    if(pass !== confirm){
+      err.textContent = 'Las contraseñas no coinciden.';
+      err.classList.add('show'); return;
+    }
+
+    var btn = document.getElementById('btn-reset');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    sb.auth.updateUser({ password: pass }).then(function(res){
+      if(res.error){
+        err.textContent = res.error.message;
+        err.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Guardar nueva contraseña →';
+        return;
+      }
+      // Éxito
+      document.getElementById('form-view').style.display='none';
+      document.getElementById('success-view').style.display='block';
+      // Sign out so they log in fresh
+      setTimeout(function(){ sb.auth.signOut(); }, 1500);
+    });
+  });
+
+  // Enter key
+  document.getElementById('confirm-pass').addEventListener('keydown', function(e){
+    if(e.key==='Enter') document.getElementById('btn-reset').click();
+  });
+
+});
+</script>
+</body>
+</html>
