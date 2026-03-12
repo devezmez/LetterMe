@@ -286,6 +286,37 @@
     body.dark .tag-Tecnologia{background:rgba(6,182,212,.22);color:#22d3ee}
     body.dark .tag-OffTopic {background:rgba(245,158,11,.22);color:#fbbf24}
 
+
+    /* PINNED / HIGHLIGHTED POSTS */
+    .post-card.is-pinned{
+      border-color:transparent;
+      background:linear-gradient(135deg,rgba(124,58,237,.08) 0%,rgba(168,85,247,.06) 50%,rgba(236,72,153,.06) 100%);
+      box-shadow:0 0 0 1.5px rgba(124,58,237,.35),0 4px 20px rgba(124,58,237,.15);
+      position:relative;
+    }
+    .post-card.is-pinned:hover{
+      box-shadow:0 0 0 2px rgba(124,58,237,.5),0 8px 28px rgba(124,58,237,.2);
+      transform:translateY(-1px);
+    }
+    body.dark .post-card.is-pinned{
+      background:linear-gradient(135deg,rgba(124,58,237,.14) 0%,rgba(168,85,247,.10) 50%,rgba(236,72,153,.08) 100%);
+      box-shadow:0 0 0 1.5px rgba(168,85,247,.4),0 4px 20px rgba(124,58,237,.25);
+    }
+    .post-card.is-pinned .post-title-card{
+      background:linear-gradient(135deg,#7c3aed,#a855f7,#ec4899);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .pinned-badge{display:inline-flex;align-items:center;gap:.2rem;font-family:var(--font-mono);font-size:.55rem;font-weight:600;padding:.1rem .42rem;border-radius:20px;background:rgba(124,58,237,.12);color:#a855f7;border:1px solid rgba(168,85,247,.3);flex-shrink:0}
+    body.dark .pinned-badge{background:rgba(124,58,237,.22);color:#c084fc}
+
+    /* PIN TOGGLE in editor */
+    .pin-toggle-wrap{display:flex;align-items:center;gap:.45rem;padding:.28rem .65rem;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;cursor:pointer;transition:all .2s;user-select:none}
+    .pin-toggle-wrap:hover{border-color:rgba(124,58,237,.4)}
+    .pin-toggle-wrap.active{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.5)}
+    .pin-toggle-wrap input[type=checkbox]{width:14px;height:14px;accent-color:#7c3aed;cursor:pointer;flex-shrink:0}
+    .pin-toggle-label{font-family:var(--font-mono);font-size:.65rem;font-weight:500;color:var(--text-muted);white-space:nowrap}
+    .pin-toggle-wrap.active .pin-toggle-label{color:#a855f7}
+
     /* TAG SELECTOR in editor footer */
     .tag-select-wrap{display:flex;align-items:center;gap:.4rem}
     .tag-select-wrap label{font-size:.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;margin:0}
@@ -346,6 +377,35 @@
       .filter-count{display:none}
       .filter-clear{width:auto;padding:.3rem .65rem}
     }
+
+    /* PINNED / HIGHLIGHTED POSTS */
+    .post-card.is-pinned{
+      border-color:transparent;
+      background:linear-gradient(135deg,rgba(244,99,42,.07) 0%,rgba(255,140,90,.05) 100%);
+      box-shadow:0 0 0 1.5px rgba(244,99,42,.35),0 4px 20px rgba(244,99,42,.12);
+    }
+    .post-card.is-pinned:hover{
+      box-shadow:0 0 0 2px rgba(244,99,42,.5),0 8px 28px rgba(244,99,42,.18);
+      transform:translateY(-2px);
+    }
+    body.dark .post-card.is-pinned{
+      background:linear-gradient(135deg,rgba(244,99,42,.13) 0%,rgba(255,140,90,.08) 100%);
+      box-shadow:0 0 0 1.5px rgba(244,99,42,.45),0 4px 20px rgba(244,99,42,.2);
+    }
+    .post-card.is-pinned .post-title-card{color:var(--orange)}
+    .pinned-badge{display:inline-flex;align-items:center;gap:.2rem;font-family:var(--font-mono);font-size:.55rem;font-weight:600;padding:.1rem .42rem;border-radius:20px;background:rgba(244,99,42,.1);color:var(--orange);border:1px solid rgba(244,99,42,.3)}
+    /* PIN TOGGLE in editor */
+    .pin-toggle-wrap{display:none;align-items:center;gap:.45rem;padding:.28rem .7rem;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;cursor:pointer;transition:all .2s;user-select:none}
+    .pin-toggle-wrap.admin-visible{display:flex}
+    .pin-toggle-wrap.active{background:rgba(244,99,42,.08);border-color:rgba(244,99,42,.45)}
+    .pin-toggle-wrap input[type=checkbox]{width:14px;height:14px;accent-color:var(--orange);cursor:pointer;flex-shrink:0}
+    .pin-toggle-label{font-family:var(--font-mono);font-size:.63rem;font-weight:500;color:var(--text-muted);white-space:nowrap}
+    .pin-toggle-wrap.active .pin-toggle-label{color:var(--orange)}
+    /* pin btn in detail */
+    .pin-action-btn{padding:.32rem .8rem;border:1.5px solid var(--border2);border-radius:8px;background:none;color:var(--text-muted);font-family:var(--font-mono);font-size:.68rem;cursor:pointer;transition:all .2s}
+    .pin-action-btn:hover{border-color:var(--orange);color:var(--orange)}
+    .pin-action-btn.pinned{background:rgba(244,99,42,.1);border-color:rgba(244,99,42,.4);color:var(--orange)}
+
   </style>
 </head>
 <body data-screen="auth" data-page="lobby" data-view="compact">
@@ -480,6 +540,10 @@
           <button class="vis-btn active-pub" id="vis-public">🌐 Público</button>
           <button class="vis-btn" id="vis-private">🔒 Privado</button>
         </div>
+        <label class="pin-toggle-wrap" id="pin-toggle-wrap" style="display:none">
+          <input type="checkbox" id="pin-toggle"/>
+          <span class="pin-toggle-label">📌 Fijar y resaltar</span>
+        </label>
         <div class="tag-select-wrap">
           <label>Tema</label>
           <select id="editor-tag">
@@ -632,8 +696,12 @@ window.addEventListener('load', function() {
     return null;
   }
   function resetRateLimit(){ loginAttempts=0; loginBlockedUntil=0; }
-  var isPublic=true; // visibilidad del editor
-  var activeTag=null; // filtro activo de tema
+  var isPublic=true;
+  var activeTag=null;
+  var isPinned=false;
+  var userRole='user';
+  var isPinned=false; // solo admin puede activar
+  var userRole='user'; // rol del usuario logueado // filtro activo de tema
 
   var TAGS={
     Musica:    {label:'🎵 Música',    cls:'tag-Musica'},
@@ -699,6 +767,15 @@ window.addEventListener('load', function() {
   }
   document.getElementById('vis-public').addEventListener('click',function(){ setVisibility(true); });
   document.getElementById('vis-private').addEventListener('click',function(){ setVisibility(false); });
+  document.getElementById('pin-toggle').addEventListener('change',function(){
+    isPinned=this.checked;
+    var wrap=document.getElementById('pin-toggle-wrap');
+    wrap.classList.toggle('active',isPinned);
+  });
+  document.getElementById('pin-toggle').addEventListener('change',function(){
+    isPinned=this.checked;
+    document.getElementById('pin-toggle-wrap').classList.toggle('active',isPinned);
+  });
 
   // ── EMOJIS ───────────────────────────────
   var egrid=document.getElementById('emoji-grid');
@@ -744,14 +821,14 @@ window.addEventListener('load', function() {
 
   // ── ACTIVAR APP ──────────────────────────
   function activateApp(u){
-    return sb.from('profiles').select('alias,banned').eq('id',u.id).single().then(function(res){
+    return sb.from('profiles').select('alias,banned,role').eq('id',u.id).single().then(function(res){
       if(res.data && res.data.banned){
         sb.auth.signOut();
         var er=document.getElementById('login-err')||document.getElementById('reg-err');
         if(er){ er.textContent='Tu cuenta fue suspendida. Contactá al administrador.'; er.classList.add('show'); }
         return;
       }
-      user=u; alias=(res.data&&res.data.alias)?res.data.alias:'Anónimo';
+      user=u; alias=(res.data&&res.data.alias)?res.data.alias:'Anónimo'; userRole=res.data.role||'user'; userRole=res.data.role||'user';
       document.getElementById('nav-alias').textContent='@'+alias;
       document.getElementById('c-avatar').textContent=alias[0].toUpperCase();
       screen('app'); goTo('lobby');
@@ -792,6 +869,9 @@ window.addEventListener('load', function() {
     document.getElementById('editor-body').innerHTML='';
     setVisibility(true);
     document.getElementById('editor-tag').value='General';
+    isPinned=false; document.getElementById('pin-toggle').checked=false;
+    var ptw=document.getElementById('pin-toggle-wrap');
+    ptw.style.display=(userRole==='admin')?'flex':'none';
     goTo('editor');
   });
   document.getElementById('btn-back').addEventListener('click',   function(){ goTo('lobby'); });
@@ -890,7 +970,7 @@ window.addEventListener('load', function() {
   function loadLobby(){
     var el=document.getElementById('lobby-feed');
     el.innerHTML='<div class="loading">Cargando posts...</div>';
-    var q=sb.from('posts').select('*').eq('is_public',true).order('created_at',{ascending:false});
+    var q=sb.from('posts').select('*').eq('is_public',true).order('pinned',{ascending:false}).order('created_at',{ascending:false});
     if(activeTag) q=q.eq('tag',activeTag);
     q.then(function(r){
       // Also fetch all public posts to build counts (ignoring active filter)
@@ -920,10 +1000,10 @@ window.addEventListener('load', function() {
         posts.forEach(function(post){
           var pushed=!!mySet[post.id], pc=pCount[post.id]||0, cc=cCount[post.id]||0;
           var preview=(post.body||'').replace(/<[^>]*>/g,'').slice(0,140);
-          var card=document.createElement('div'); card.className='post-card';
+          var card=document.createElement('div'); card.className='post-card'+(post.pinned?' is-pinned':'');
           card.innerHTML=
             '<div class="post-card-left">'+
-              '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+tagBadge(post.tag||'General')+'</div>'+
+              '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+tagBadge(post.tag||'General')+(post.pinned?'<span class="pinned-badge">📌 Fijado</span>':'')+'</div>'+
               '<div class="post-title-card">'+esc(post.title)+'</div>'+
               '<div class="post-preview-text">'+esc(preview)+(preview.length===140?'…':'')+'</div>'+
             '</div>'+
@@ -957,13 +1037,15 @@ window.addEventListener('load', function() {
         var hasPushed=!!pr[0].data, pushCount=pr[1].data?pr[1].data.length:0, isOwner=post.user_id===user.id;
         var privLabel=!post.is_public?'<span class="private-badge" style="font-size:.65rem">🔒 Privado</span>':'';
         var tagLabel=tagBadge(post.tag||'General');
+        var pinnedLabel=post.pinned?'<span class="pinned-badge">📌 Fijado</span>':'';
+        var pinBtn=(isOwner&&userRole==='admin')?'<button class="pin-action-btn'+(post.pinned?' pinned':'')+'" id="detail-pin-btn">'+(post.pinned?'📌 Desfijado':'📌 Fijar')+'</button>':'';
         var ownerBtns=isOwner
           ?'<button class="btn btn-ghost btn-sm" id="detail-edit-btn">✏ Editar</button>'+
             '<button class="btn btn-danger btn-sm" id="detail-del-btn">Eliminar</button>'+
-            '<button class="visibility-btn '+(post.is_public?'is-public':'')+'" id="detail-vis-btn">'+(post.is_public?'🌐 Público':'🔒 Privado')+'</button>'
+            '<button class="visibility-btn '+(post.is_public?'is-public':'')+'" id="detail-vis-btn">'+(post.is_public?'🌐 Público':'🔒 Privado')+'</button>'+pinBtn
           :'';
         document.getElementById('detail-content').innerHTML=
-          '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+privLabel+'</div>'+
+          '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+tagLabel+privLabel+pinnedLabel+'</div>'+
           '<div class="detail-title">'+esc(post.title)+'</div>'+
           '<div class="detail-body">'+sanitize(post.body)+'</div>'+
           '<div class="detail-actions">'+
@@ -988,12 +1070,27 @@ window.addEventListener('load', function() {
             document.getElementById('editor-body').innerHTML=post.body;
             setVisibility(post.is_public);
             document.getElementById('editor-tag').value=post.tag||'General';
+            isPinned=!!(post.pinned);
+            document.getElementById('pin-toggle').checked=!!post.pinned;
+            document.getElementById('pin-toggle-wrap').classList.toggle('active',!!post.pinned);
+            if(userRole==='admin') document.getElementById('pin-toggle-wrap').classList.add('admin-visible');
+            else document.getElementById('pin-toggle-wrap').classList.remove('admin-visible');
             goTo('editor');
           });
           document.getElementById('detail-del-btn').addEventListener('click',function(){
             deletingId=post.id; document.getElementById('del-modal').classList.add('open');
           });
           // toggle visibilidad desde el detalle
+          if(userRole==='admin' && document.getElementById('detail-pin-btn')){
+            document.getElementById('detail-pin-btn').addEventListener('click',function(){
+              var newPin=!post.pinned;
+              sb.from('posts').update({pinned:newPin,highlighted:newPin}).eq('id',postId).eq('user_id',user.id).then(function(res){
+                if(res.error){ toast('Error al actualizar','err'); return; }
+                toast(newPin?'📌 Post fijado y resaltado':'Post desfijado');
+                loadDetail(postId);
+              });
+            });
+          }
           document.getElementById('detail-vis-btn').addEventListener('click',function(){
             var newPub=!post.is_public;
             sb.from('posts').update({is_public:newPub}).eq('id',postId).eq('user_id',user.id).then(function(res){
@@ -1126,9 +1223,10 @@ window.addEventListener('load', function() {
     if(!title){ toast('El título es requerido'); return; }
     if(!body||body==='<br>'){ toast('El contenido es requerido'); return; }
     var tag=document.getElementById('editor-tag').value||'General';
+    var pinVal=(userRole==='admin')?isPinned:false;
     var p=editingId
-      ? sb.from('posts').update({title:title,body:body,is_public:isPublic,tag:tag}).eq('id',editingId).eq('user_id',user.id)
-      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic,tag:tag});
+      ? sb.from('posts').update({title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal}).eq('id',editingId).eq('user_id',user.id)
+      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal});
     p.then(function(r){
       if(r.error){ toast('Error: '+r.error.message); return; }
       toast(editingId?'Artículo actualizado ✓':(isPublic?'¡Artículo publicado!':'Guardado como privado 🔒'));
@@ -1194,6 +1292,9 @@ window.addEventListener('load', function() {
             document.getElementById('editor-body').innerHTML=pp.body;
             setVisibility(pp.is_public!==false);
             document.getElementById('editor-tag').value=pp.tag||'General';
+            isPinned=!!(pp.pinned); document.getElementById('pin-toggle').checked=!!pp.pinned;
+            var ptw=document.getElementById('pin-toggle-wrap');
+            ptw.style.display=(userRole==='admin')?'flex':'none';
             goTo('editor');
           });
           card.querySelector('.del-btn').addEventListener('click',function(){
