@@ -22,6 +22,13 @@
     *{margin:0;padding:0;box-sizing:border-box}
     body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.6;min-height:100vh}
 
+
+    /* PASSWORD TOGGLE */
+    .pass-wrap{position:relative;display:flex;align-items:center}
+    .pass-wrap input{padding-right:2.4rem}
+    .eye-btn{position:absolute;right:.65rem;background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;padding:0;display:flex;align-items:center;justify-content:center;transition:color .2s;line-height:1}
+    .eye-btn:hover{color:var(--accent2)}
+
     /* ── AUTH ── */
     #auth-view{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;position:relative;overflow:hidden}
     #auth-view::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(124,58,237,.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(236,72,153,.08) 0%,transparent 50%);pointer-events:none}
@@ -189,7 +196,7 @@
       </div>
       <div class="field-group">
         <label>Contraseña</label>
-        <input type="password" id="login-pass" placeholder="••••••••"/>
+        <div class="pass-wrap"><input type="password" id="login-pass" placeholder="••••••••"/><button class="eye-btn" data-target="login-pass" type="button">👁</button></div>
       </div>
       <div class="err" id="login-err"></div>
       <button class="btn btn-primary btn-full" id="btn-login">Ingresar →</button>
@@ -379,7 +386,7 @@
     </div>
     <div class="field-group">
       <label>Contraseña</label>
-      <input type="password" id="mod-pass" placeholder="mínimo 6 caracteres"/>
+      <div class="pass-wrap"><input type="password" id="mod-pass" placeholder="mínimo 6 caracteres"/><button class="eye-btn" data-target="mod-pass" type="button">👁</button></div>
     </div>
     <div>
       <label style="display:block;margin-bottom:.5rem">Permisos</label>
@@ -898,6 +905,15 @@ window.addEventListener('load', function(){
   // ── CHECK BAN on login (mirror in main app) ──
   // The main app should also check profiles.banned on activateApp
   // This is handled by the main letter-me-v2.html via the ban column
+
+  // ── PASSWORD TOGGLE ─────────────────────
+  document.querySelectorAll('.eye-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var inp=document.getElementById(this.getAttribute('data-target'));
+      if(inp.type==='password'){ inp.type='text'; this.textContent='🙈'; }
+      else{ inp.type='password'; this.textContent='👁'; }
+    });
+  });
 
 }); // end load
 </script>
