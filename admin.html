@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Letter Me — Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@0,300;0,400;0,500;0,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+  <meta name="referrer" content="no-referrer"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     :root{
       --bg:#0d0d0f;--surface:#16151a;--surface2:#1e1c24;--surface3:#252330;
@@ -479,6 +483,23 @@ window.addEventListener('load', function(){
 
   // ── ESTADO ───────────────────────────────
   var adminUser = null, adminProfile = null;
+
+  // ── RATE LIMIT (admin login — más estricto) ──
+  var adminAttempts=0, adminBlockedUntil=0;
+  function checkAdminRateLimit(){
+    var now=Date.now();
+    if(now < adminBlockedUntil){
+      var secs=Math.ceil((adminBlockedUntil-now)/1000);
+      return 'Acceso bloqueado. Esperá '+secs+' segundos.';
+    }
+    adminAttempts++;
+    if(adminAttempts>=3){
+      adminBlockedUntil=Date.now()+120000; // 2 min block
+      adminAttempts=0;
+      return 'Demasiados intentos. Acceso bloqueado por 2 minutos.';
+    }
+    return null;
+  }
   var allUsers=[], allPosts=[];
   var confirmCallback = null;
   var editingPermUid = null, editingAliasUid = null;
@@ -507,7 +528,7 @@ window.addEventListener('load', function(){
     if((event==='SIGNED_IN'||event==='INITIAL_SESSION') && session && !adminUser){
       adminUser=session.user;
       sb.from('profiles').select('*').eq('id',adminUser.id).single().then(function(r){
-        if(!r.data || (r.data.role!=='admin' && r.data.role!=='mod')){
+        if(!r.data || r.data.banned || (r.data.role!=='admin' && r.data.role!=='mod')){
           toast('Sin permisos de acceso','err');
           sb.auth.signOut(); adminUser=null; return;
         }
@@ -517,7 +538,8 @@ window.addEventListener('load', function(){
         document.getElementById('su-role').textContent=adminProfile.role==='admin'?'Administrador':'Moderador';
         // show/hide nav based on role & perms
         if(adminProfile.role!=='admin'){
-          if(!canDo('view_private')) document.getElementById('nav-mods').style.display='none';
+          // Mods can never access mod management regardless of perms
+          document.getElementById('nav-mods').style.display='none';
         }
         screen('app');
         loadDashboard();
@@ -532,8 +554,11 @@ window.addEventListener('load', function(){
     var pw=document.getElementById('login-pass').value;
     var er=document.getElementById('login-err'); er.classList.remove('show');
     if(!em||!pw){ er.textContent='Completá todos los campos.'; er.classList.add('show'); return; }
+    var rl=checkAdminRateLimit();
+    if(rl){ er.textContent=rl; er.classList.add('show'); return; }
     sb.auth.signInWithPassword({email:em,password:pw}).then(function(res){
-      if(res.error){ er.textContent=res.error.message; er.classList.add('show'); }
+      if(res.error){ er.textContent=res.error.message; er.classList.add('show'); return; }
+      adminAttempts=0; adminBlockedUntil=0;
     });
   });
   document.getElementById('login-pass').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('btn-login').click(); });
