@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Letter Me — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@0,300;0,400;0,500;0,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root{
+      --bg:#0d0d0f;--surface:#16151a;--surface2:#1e1c24;--surface3:#252330;
+      --border:#2a2833;--border2:#332f40;
+      --accent:#7c3aed;--accent2:#a855f7;--accent-dim:rgba(124,58,237,.15);
+      --grad:linear-gradient(135deg,#7c3aed,#a855f7,#ec4899);
+      --grad2:linear-gradient(135deg,#6d28d9,#7c3aed);
+      --text:#f0eef8;--text-muted:#6b6880;--text-dim:#a09cb8;
+      --danger:#ef4444;--warning:#f59e0b;--success:#22c55e;
+      --font-display:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
+      --shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 12px 48px rgba(0,0,0,.6);
+      --radius:14px;--radius-sm:8px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.6;min-height:100vh}
+
+    /* ── AUTH ── */
+    #auth-view{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;position:relative;overflow:hidden}
+    #auth-view::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(124,58,237,.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(236,72,153,.08) 0%,transparent 50%);pointer-events:none}
+    body[data-screen="auth"] #auth-view{display:flex}
+    .auth-box{width:100%;max-width:380px;position:relative;z-index:1}
+    .auth-logo{text-align:center;margin-bottom:2rem}
+    .auth-logo h1{font-family:var(--font-display);font-size:2rem;font-weight:800;letter-spacing:-.5px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .auth-logo p{font-family:var(--font-mono);font-size:.62rem;color:var(--text-muted);letter-spacing:.18em;text-transform:uppercase;margin-top:.35rem}
+    .auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1.75rem;box-shadow:var(--shadow-lg)}
+    .auth-card h2{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:1.25rem;color:var(--text-dim)}
+    .field-group{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.85rem}
+    label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)}
+    input[type="email"],input[type="password"],input[type="text"],select,textarea{background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:.88rem;padding:.65rem .9rem;border-radius:var(--radius-sm);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.18)}
+    .err{font-family:var(--font-mono);font-size:.68rem;color:var(--danger);padding:.5rem .7rem;background:rgba(239,68,68,.08);border-radius:6px;border-left:2px solid var(--danger);display:none;margin-bottom:.75rem}
+    .err.show{display:block}
+
+    /* ── BUTTONS ── */
+    .btn{padding:.6rem 1.1rem;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-body);font-size:.82rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap}
+    .btn-primary{background:var(--grad2);color:#fff;box-shadow:0 4px 14px rgba(109,40,217,.35)}
+    .btn-primary:hover{filter:brightness(1.15);transform:translateY(-1px)}
+    .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text-dim)}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+    .btn-danger:hover{background:var(--danger);color:#fff}
+    .btn-warning{background:transparent;border:1px solid var(--warning);color:var(--warning)}
+    .btn-warning:hover{background:var(--warning);color:#000}
+    .btn-success{background:transparent;border:1px solid var(--success);color:var(--success)}
+    .btn-success:hover{background:var(--success);color:#000}
+    .btn-sm{padding:.3rem .7rem;font-size:.72rem;border-radius:6px}
+    .btn-full{width:100%;justify-content:center}
+    .btn-icon{width:30px;height:30px;padding:0;border-radius:6px;font-size:.85rem;justify-content:center}
+
+    /* ── APP LAYOUT ── */
+    #app-view{display:none}
+    body[data-screen="app"] #app-view{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+    .sidebar-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+    .sidebar-logo h1{font-family:var(--font-display);font-size:1.1rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .sidebar-logo p{font-family:var(--font-mono);font-size:.56rem;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-top:.2rem}
+    .sidebar-user{padding:.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.65rem}
+    .su-avatar{width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:.8rem;font-weight:800;color:#fff;flex-shrink:0}
+    .su-info{min-width:0}
+    .su-alias{font-family:var(--font-mono);font-size:.7rem;font-weight:500;color:var(--accent2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .su-role{font-family:var(--font-mono);font-size:.55rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em}
+    .sidebar-nav{flex:1;padding:.75rem 0}
+    .nav-item{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.25rem;cursor:pointer;font-size:.82rem;font-weight:500;color:var(--text-dim);transition:all .2s;border-left:3px solid transparent}
+    .nav-item:hover{background:var(--accent-dim);color:var(--text)}
+    .nav-item.active{background:var(--accent-dim);color:var(--accent2);border-left-color:var(--accent)}
+    .nav-item-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+    .nav-sep{height:1px;background:var(--border);margin:.5rem 1.25rem}
+    .nav-label{font-family:var(--font-mono);font-size:.52rem;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;padding:.5rem 1.25rem .25rem}
+    .sidebar-footer{padding:.85rem 1.25rem;border-top:1px solid var(--border)}
+
+    /* MAIN CONTENT */
+    .main{overflow-y:auto;background:var(--bg)}
+    .main-header{padding:1.5rem 2rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--surface);position:sticky;top:0;z-index:10}
+    .main-title{font-family:var(--font-display);font-size:1.3rem;font-weight:800;letter-spacing:-.3px}
+    .main-title small{font-family:var(--font-mono);font-size:.6rem;font-weight:400;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;display:block;margin-top:.1rem}
+    .main-body{padding:1.5rem 2rem 3rem}
+
+    /* TABS */
+    .panel{display:none}
+    .panel.active{display:block}
+
+    /* STAT CARDS */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+    .stat-card-n{font-family:var(--font-display);font-size:2rem;font-weight:800;line-height:1;margin-bottom:.25rem}
+    .stat-card-l{font-family:var(--font-mono);font-size:.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em}
+    .stat-card-icon{position:absolute;top:1rem;right:1rem;font-size:1.5rem;opacity:.25}
+
+    /* TABLE */
+    .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .table-toolbar{padding:.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+    .search-input{background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:.45rem .8rem;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:.8rem;outline:none;width:220px;transition:border-color .2s}
+    .search-input:focus{border-color:var(--accent)}
+    .table-scroll{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    th{font-family:var(--font-mono);font-size:.58rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;padding:.7rem 1.1rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface2)}
+    td{padding:.7rem 1.1rem;border-bottom:1px solid var(--border);font-size:.82rem;color:var(--text-dim);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--accent-dim)}
+    .mono{font-family:var(--font-mono);font-size:.72rem}
+    .truncate{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* BADGES */
+    .badge{display:inline-flex;align-items:center;gap:.22rem;font-family:var(--font-mono);font-size:.6rem;font-weight:600;padding:.15rem .55rem;border-radius:20px;letter-spacing:.03em}
+    .badge-admin{background:rgba(124,58,237,.2);color:#a855f7;border:1px solid rgba(168,85,247,.3)}
+    .badge-mod{background:rgba(6,182,212,.2);color:#22d3ee;border:1px solid rgba(6,182,212,.3)}
+    .badge-user{background:rgba(107,104,128,.15);color:var(--text-muted);border:1px solid var(--border2)}
+    .badge-banned{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+    .badge-active{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+    .badge-pub{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+    .badge-priv{background:rgba(107,104,128,.12);color:var(--text-muted);border:1px solid var(--border2)}
+
+    /* TAG colors (same as main app) */
+    .tag-Musica   {background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
+    .tag-Arte     {background:rgba(236,72,153,.15);color:#f472b6;border:1px solid rgba(236,72,153,.3)}
+    .tag-Deporte  {background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+    .tag-General  {background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3)}
+    .tag-Tecnologia{background:rgba(6,182,212,.15);color:#22d3ee;border:1px solid rgba(6,182,212,.3)}
+    .tag-OffTopic {background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+
+    /* ACTION BUTTONS row */
+    .actions{display:flex;gap:.3rem;flex-wrap:wrap}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:1.25rem}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1.75rem;width:100%;max-width:460px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:1rem}
+    .modal h3{font-family:var(--font-display);font-size:1.05rem;font-weight:700}
+    .modal p{font-size:.84rem;color:var(--text-dim);line-height:1.55}
+    .modal-actions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:.25rem;flex-wrap:wrap}
+    .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+    .perm-item{display:flex;align-items:center;gap:.5rem;font-size:.8rem;cursor:pointer;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;border:1px solid var(--border)}
+    .perm-item input{width:14px;height:14px;accent-color:var(--accent);cursor:pointer}
+
+    /* TOAST */
+    #toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:.65rem 1rem;font-size:.78rem;font-weight:500;color:var(--text);z-index:999;transform:translateY(100px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;display:flex;align-items:center;gap:.4rem;max-width:280px;box-shadow:var(--shadow)}
+    #toast.show{transform:translateY(0);opacity:1}
+    #toast.t-ok::before{content:'✓';color:var(--success)}
+    #toast.t-err::before{content:'✗';color:var(--danger)}
+    #toast.t-info::before{content:'ℹ';color:var(--accent2)}
+
+    /* EMPTY / LOADING */
+    .empty{text-align:center;padding:3rem 1rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted)}
+    .loading-row td{text-align:center;padding:2rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted)}
+
+    /* PERM TAGS inside mod row */
+    .perm-tag{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:.55rem;padding:.1rem .4rem;border-radius:4px;background:var(--accent-dim);color:var(--accent2);margin:.1rem}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      body[data-screen="app"] #app-view{grid-template-columns:1fr}
+      .sidebar{position:fixed;left:-220px;z-index:200;transition:left .25s;height:100vh}
+      .sidebar.open{left:0}
+      .main{min-height:100vh}
+      .main-header{padding:1rem 1.25rem}
+      .main-body{padding:1rem 1.25rem 3rem}
+      .mob-menu-btn{display:flex}
+    }
+    .mob-menu-btn{display:none;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--border2);border-radius:6px;background:none;color:var(--text-dim);cursor:pointer;font-size:1.1rem}
+    .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
+    .mob-overlay.open{display:block}
+  </style>
+</head>
+<body data-screen="auth">
+
+<!-- AUTH -->
+<div id="auth-view">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <h1>Letter Me</h1>
+      <p>Panel de Administración</p>
+    </div>
+    <div class="auth-card">
+      <h2>🔐 Acceso restringido</h2>
+      <div class="field-group">
+        <label>Correo</label>
+        <input type="email" id="login-email" placeholder="admin@correo.com"/>
+      </div>
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••"/>
+      </div>
+      <div class="err" id="login-err"></div>
+      <button class="btn btn-primary btn-full" id="btn-login">Ingresar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-view">
+  <!-- mobile overlay -->
+  <div class="mob-overlay" id="mob-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h1>Letter Me</h1>
+      <p>Admin Panel</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="su-avatar" id="su-avatar">?</div>
+      <div class="su-info">
+        <div class="su-alias" id="su-alias">—</div>
+        <div class="su-role" id="su-role">—</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">General</div>
+      <div class="nav-item active" data-panel="dashboard">
+        <span class="nav-item-icon">📊</span> Dashboard
+      </div>
+
+      <div class="nav-sep"></div>
+      <div class="nav-label">Contenido</div>
+      <div class="nav-item" data-panel="posts" id="nav-posts">
+        <span class="nav-item-icon">📝</span> Publicaciones
+      </div>
+
+      <div class="nav-sep"></div>
+      <div class="nav-label">Comunidad</div>
+      <div class="nav-item" data-panel="users" id="nav-users">
+        <span class="nav-item-icon">👥</span> Usuarios
+      </div>
+      <div class="nav-item" data-panel="mods" id="nav-mods">
+        <span class="nav-item-icon">🛡</span> Moderadores
+      </div>
+
+      <div class="nav-sep"></div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-full btn-sm" id="btn-logout">⏻ Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="main-header">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button class="mob-menu-btn" id="mob-menu-btn">☰</button>
+        <div class="main-title">
+          <span id="panel-title">Dashboard</span>
+          <small id="panel-subtitle">Resumen general</small>
+        </div>
+      </div>
+      <div id="header-actions"></div>
+    </div>
+    <div class="main-body">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-icon">👥</div><div class="stat-card-n" id="st-users">—</div><div class="stat-card-l">Usuarios</div></div>
+          <div class="stat-card"><div class="stat-card-icon">📝</div><div class="stat-card-n" id="st-posts">—</div><div class="stat-card-l">Posts públicos</div></div>
+          <div class="stat-card"><div class="stat-card-icon">🔒</div><div class="stat-card-n" id="st-private">—</div><div class="stat-card-l">Posts privados</div></div>
+          <div class="stat-card"><div class="stat-card-icon">🚫</div><div class="stat-card-n" id="st-banned">—</div><div class="stat-card-l">Baneados</div></div>
+          <div class="stat-card"><div class="stat-card-icon">💬</div><div class="stat-card-n" id="st-comments">—</div><div class="stat-card-l">Comentarios</div></div>
+          <div class="stat-card"><div class="stat-card-icon">↑</div><div class="stat-card-n" id="st-pushs">—</div><div class="stat-card-l">Pushs</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar" style="justify-content:space-between">
+            <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">⚡ Últimos posts</span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Título</th><th>Autor</th><th>Tema</th><th>Visibilidad</th><th>Fecha</th></tr></thead>
+              <tbody id="dash-recent"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSTS -->
+      <div class="panel" id="panel-posts">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input class="search-input" id="search-posts" placeholder="Buscar por título o autor..."/>
+            <select class="search-input" id="filter-tag-posts" style="width:auto">
+              <option value="">Todos los temas</option>
+              <option value="Musica">🎵 Música</option>
+              <option value="Arte">🎨 Arte</option>
+              <option value="Deporte">⚽ Deporte</option>
+              <option value="General">💬 General</option>
+              <option value="Tecnologia">💻 Tecnología</option>
+              <option value="OffTopic">🌀 Off Topic</option>
+            </select>
+            <select class="search-input" id="filter-vis-posts" style="width:auto">
+              <option value="">Toda visibilidad</option>
+              <option value="true">Públicos</option>
+              <option value="false">Privados</option>
+            </select>
+            <span class="mono" id="posts-count" style="margin-left:auto;color:var(--text-muted)"></span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Título</th><th>Autor</th><th>Tema</th><th>Vis.</th><th>💬</th><th>↑</th><th>Fecha</th><th>Acciones</th></tr></thead>
+              <tbody id="posts-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="panel" id="panel-users">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input class="search-input" id="search-users" placeholder="Buscar por alias..."/>
+            <select class="search-input" id="filter-status-users" style="width:auto">
+              <option value="">Todos</option>
+              <option value="active">Activos</option>
+              <option value="banned">Baneados</option>
+            </select>
+            <span class="mono" id="users-count" style="margin-left:auto;color:var(--text-muted)"></span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Alias</th><th>Rol</th><th>Estado</th><th>Posts públicos</th><th>Registro</th><th>Acciones</th></tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODS -->
+      <div class="panel" id="panel-mods">
+        <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap">
+          <button class="btn btn-primary" id="btn-create-mod">+ Crear moderador</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em">Moderadores activos</span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Alias</th><th>Permisos</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="mods-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main-body -->
+  </main>
+</div>
+
+<!-- Modal confirmación genérica -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3 id="confirm-title">¿Confirmar acción?</h3>
+    <p id="confirm-body">Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="confirm-cancel">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="confirm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal crear moderador -->
+<div class="modal-overlay" id="mod-modal">
+  <div class="modal">
+    <h3>🛡 Crear moderador</h3>
+    <div class="field-group">
+      <label>Alias</label>
+      <input type="text" id="mod-alias" placeholder="alias_moderador"/>
+    </div>
+    <div class="field-group">
+      <label>Correo</label>
+      <input type="email" id="mod-email" placeholder="mod@correo.com"/>
+    </div>
+    <div class="field-group">
+      <label>Contraseña</label>
+      <input type="password" id="mod-pass" placeholder="mínimo 6 caracteres"/>
+    </div>
+    <div>
+      <label style="display:block;margin-bottom:.5rem">Permisos</label>
+      <div class="perm-grid">
+        <label class="perm-item"><input type="checkbox" id="perm-delete-posts"/> Eliminar posts</label>
+        <label class="perm-item"><input type="checkbox" id="perm-ban-users"/> Banear usuarios</label>
+        <label class="perm-item"><input type="checkbox" id="perm-edit-alias"/> Editar alias</label>
+        <label class="perm-item"><input type="checkbox" id="perm-view-private"/> Ver privados</label>
+      </div>
+    </div>
+    <div class="err" id="mod-err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-mod-cancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="btn-mod-create">Crear →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar permisos mod -->
+<div class="modal-overlay" id="perms-modal">
+  <div class="modal">
+    <h3>🛡 Editar permisos</h3>
+    <p id="perms-modal-alias" style="font-family:var(--font-mono);font-size:.75rem;color:var(--accent2)"></p>
+    <div class="perm-grid">
+      <label class="perm-item"><input type="checkbox" id="ep-delete-posts"/> Eliminar posts</label>
+      <label class="perm-item"><input type="checkbox" id="ep-ban-users"/> Banear usuarios</label>
+      <label class="perm-item"><input type="checkbox" id="ep-edit-alias"/> Editar alias</label>
+      <label class="perm-item"><input type="checkbox" id="ep-view-private"/> Ver privados</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-perms-cancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="btn-perms-save">Guardar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar alias usuario -->
+<div class="modal-overlay" id="alias-modal">
+  <div class="modal">
+    <h3>✏ Editar alias</h3>
+    <p id="alias-modal-current" style="font-family:var(--font-mono);font-size:.75rem;color:var(--text-muted)"></p>
+    <div class="field-group">
+      <label>Nuevo alias</label>
+      <input type="text" id="alias-new-input" placeholder="nuevo_alias"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-alias-cancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="btn-alias-save">Guardar →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+window.addEventListener('load', function(){
+
+  // ── SUPABASE ─────────────────────────────
+  var sb = supabase.createClient(
+    'https://ykijutktwofzzglhdses.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlraWp1dGt0d29menpnbGhkc2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTc3MjksImV4cCI6MjA4ODczMzcyOX0.Qz4iKwhmmoMuev34STFklSg-Aoult9yIFZ-y9U3y3LU'
+  );
+
+  // ── ESTADO ───────────────────────────────
+  var adminUser = null, adminProfile = null;
+  var allUsers=[], allPosts=[];
+  var confirmCallback = null;
+  var editingPermUid = null, editingAliasUid = null;
+
+  // ── HELPERS ──────────────────────────────
+  function screen(s){ document.body.setAttribute('data-screen',s); }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fdate(iso){ return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}); }
+  function toast(msg, type){
+    var t=document.getElementById('toast');
+    t.textContent=msg; t.className='show t-'+(type||'ok');
+    setTimeout(function(){ t.classList.remove('show'); },3200);
+  }
+  function canDo(perm){
+    if(!adminProfile) return false;
+    if(adminProfile.role==='admin') return true;
+    return !!(adminProfile.perms && adminProfile.perms[perm]);
+  }
+  function tagBadge(tag){
+    var map={Musica:'🎵',Arte:'🎨',Deporte:'⚽',General:'💬',Tecnologia:'💻',OffTopic:'🌀'};
+    return '<span class="badge tag-'+(tag||'General')+'">'+(map[tag]||'💬')+' '+(tag||'General')+'</span>';
+  }
+
+  // ── AUTH ─────────────────────────────────
+  sb.auth.onAuthStateChange(function(event,session){
+    if((event==='SIGNED_IN'||event==='INITIAL_SESSION') && session && !adminUser){
+      adminUser=session.user;
+      sb.from('profiles').select('*').eq('id',adminUser.id).single().then(function(r){
+        if(!r.data || (r.data.role!=='admin' && r.data.role!=='mod')){
+          toast('Sin permisos de acceso','err');
+          sb.auth.signOut(); adminUser=null; return;
+        }
+        adminProfile=r.data;
+        document.getElementById('su-avatar').textContent=adminProfile.alias[0].toUpperCase();
+        document.getElementById('su-alias').textContent='@'+adminProfile.alias;
+        document.getElementById('su-role').textContent=adminProfile.role==='admin'?'Administrador':'Moderador';
+        // show/hide nav based on role & perms
+        if(adminProfile.role!=='admin'){
+          if(!canDo('view_private')) document.getElementById('nav-mods').style.display='none';
+        }
+        screen('app');
+        loadDashboard();
+      });
+    } else if(event==='SIGNED_OUT'){
+      adminUser=null; adminProfile=null; screen('auth');
+    }
+  });
+
+  document.getElementById('btn-login').addEventListener('click',function(){
+    var em=document.getElementById('login-email').value.trim();
+    var pw=document.getElementById('login-pass').value;
+    var er=document.getElementById('login-err'); er.classList.remove('show');
+    if(!em||!pw){ er.textContent='Completá todos los campos.'; er.classList.add('show'); return; }
+    sb.auth.signInWithPassword({email:em,password:pw}).then(function(res){
+      if(res.error){ er.textContent=res.error.message; er.classList.add('show'); }
+    });
+  });
+  document.getElementById('login-pass').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('btn-login').click(); });
+  document.getElementById('btn-logout').addEventListener('click',function(){ sb.auth.signOut(); });
+
+  // ── PANEL NAVIGATION ─────────────────────
+  var PANELS = { dashboard:'Dashboard', posts:'Publicaciones', users:'Usuarios', mods:'Moderadores' };
+  var SUBS   = { dashboard:'Resumen general', posts:'Gestión de contenido', users:'Gestión de usuarios', mods:'Gestión de moderadores' };
+  document.querySelectorAll('.nav-item[data-panel]').forEach(function(el){
+    el.addEventListener('click',function(){
+      var p=this.getAttribute('data-panel');
+      document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+      this.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function(pn){ pn.classList.remove('active'); });
+      document.getElementById('panel-'+p).classList.add('active');
+      document.getElementById('panel-title').textContent=PANELS[p]||p;
+      document.getElementById('panel-subtitle').textContent=SUBS[p]||'';
+      closeMobileMenu();
+      if(p==='dashboard') loadDashboard();
+      if(p==='posts')     loadPosts();
+      if(p==='users')     loadUsers();
+      if(p==='mods')      loadMods();
+    });
+  });
+
+  // Mobile menu
+  document.getElementById('mob-menu-btn').addEventListener('click',function(){
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('mob-overlay').classList.add('open');
+  });
+  document.getElementById('mob-overlay').addEventListener('click', closeMobileMenu);
+  function closeMobileMenu(){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('mob-overlay').classList.remove('open');
+  }
+
+  // ── CONFIRM MODAL ────────────────────────
+  function confirm(title, body, btnLabel, btnClass, cb){
+    document.getElementById('confirm-title').textContent=title;
+    document.getElementById('confirm-body').textContent=body;
+    var okBtn=document.getElementById('confirm-ok');
+    okBtn.textContent=btnLabel||'Confirmar';
+    okBtn.className='btn btn-sm '+(btnClass||'btn-danger');
+    confirmCallback=cb;
+    document.getElementById('confirm-modal').classList.add('open');
+  }
+  document.getElementById('confirm-cancel').addEventListener('click',function(){
+    document.getElementById('confirm-modal').classList.remove('open'); confirmCallback=null;
+  });
+  document.getElementById('confirm-ok').addEventListener('click',function(){
+    document.getElementById('confirm-modal').classList.remove('open');
+    if(confirmCallback) confirmCallback(); confirmCallback=null;
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      ['confirm-modal','mod-modal','perms-modal','alias-modal'].forEach(function(id){
+        document.getElementById(id).classList.remove('open');
+      });
+    }
+  });
+
+  // ── DASHBOARD ────────────────────────────
+  function loadDashboard(){
+    Promise.all([
+      sb.from('profiles').select('id,banned,role'),
+      sb.from('posts').select('id,title,alias,tag,is_public,created_at').order('created_at',{ascending:false}).limit(8),
+      sb.from('comments').select('id'),
+      sb.from('pushs').select('id')
+    ]).then(function(r){
+      var profiles=r[0].data||[], posts=r[1].data||[], comments=r[2].data||[], pushs=r[3].data||[];
+      var banned=profiles.filter(function(p){ return p.banned; }).length;
+      var pub=posts.filter(function(p){ return p.is_public; }).length;
+      var priv=posts.filter(function(p){ return !p.is_public; }).length;
+      document.getElementById('st-users').textContent=profiles.length;
+      document.getElementById('st-posts').textContent=pub;
+      document.getElementById('st-private').textContent=priv;
+      document.getElementById('st-banned').textContent=banned;
+      document.getElementById('st-comments').textContent=comments.length;
+      document.getElementById('st-pushs').textContent=pushs.length;
+      // Recent posts table
+      var tbody=document.getElementById('dash-recent');
+      tbody.innerHTML='';
+      if(!posts.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="5">Sin posts aún</td></tr>'; return; }
+      posts.slice(0,8).forEach(function(post){
+        var tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td class="truncate">'+esc(post.title)+'</td>'+
+          '<td><span class="mono">@'+esc(post.alias)+'</span></td>'+
+          '<td>'+tagBadge(post.tag)+'</td>'+
+          '<td>'+(post.is_public?'<span class="badge badge-pub">Público</span>':'<span class="badge badge-priv">Privado</span>')+'</td>'+
+          '<td class="mono">'+fdate(post.created_at)+'</td>';
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  // ── POSTS ────────────────────────────────
+  function loadPosts(){
+    if(!canDo('delete_posts') && adminProfile.role!=='admin'){ document.getElementById('posts-tbody').innerHTML='<tr class="loading-row"><td colspan="8">Sin permisos</td></tr>'; return; }
+    sb.from('posts').select('*').order('created_at',{ascending:false}).then(function(r){
+      allPosts=r.data||[];
+      renderPosts();
+    });
+  }
+  function renderPosts(){
+    var search=document.getElementById('search-posts').value.toLowerCase();
+    var tagF=document.getElementById('filter-tag-posts').value;
+    var visF=document.getElementById('filter-vis-posts').value;
+    var filtered=allPosts.filter(function(p){
+      var matchS=!search||(p.title||'').toLowerCase().includes(search)||(p.alias||'').toLowerCase().includes(search);
+      var matchT=!tagF||p.tag===tagF;
+      var matchV=!visF||(visF==='true'?p.is_public:!p.is_public);
+      return matchS&&matchT&&matchV;
+    });
+    document.getElementById('posts-count').textContent=filtered.length+' posts';
+    var tbody=document.getElementById('posts-tbody');
+    tbody.innerHTML='';
+    if(!filtered.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="8">Sin resultados</td></tr>'; return; }
+    filtered.forEach(function(post){
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td class="truncate" style="max-width:200px">'+esc(post.title)+'</td>'+
+        '<td><span class="mono">@'+esc(post.alias)+'</span></td>'+
+        '<td>'+tagBadge(post.tag)+'</td>'+
+        '<td>'+(post.is_public?'<span class="badge badge-pub">Pub</span>':'<span class="badge badge-priv">Priv</span>')+'</td>'+
+        '<td class="mono">—</td>'+
+        '<td class="mono">—</td>'+
+        '<td class="mono">'+fdate(post.created_at)+'</td>'+
+        '<td><div class="actions">'+
+          (canDo('delete_posts')||adminProfile.role==='admin'?
+            '<button class="btn btn-danger btn-sm btn-icon del-post" data-id="'+post.id+'" title="Eliminar">✕</button>':'')+
+        '</div></td>';
+      tbody.appendChild(tr);
+    });
+    // wire delete
+    tbody.querySelectorAll('.del-post').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var pid=this.getAttribute('data-id');
+        var post=allPosts.find(function(p){ return p.id===pid; });
+        confirm('Eliminar post','¿Eliminar "'+post.title+'"? Esta acción no se puede deshacer.','Eliminar','btn-danger',function(){
+          sb.from('posts').delete().eq('id',pid).then(function(r){
+            if(r.error){ toast('Error: '+r.error.message,'err'); return; }
+            toast('Post eliminado','ok');
+            allPosts=allPosts.filter(function(p){ return p.id!==pid; });
+            renderPosts();
+          });
+        });
+      });
+    });
+  }
+  document.getElementById('search-posts').addEventListener('input', renderPosts);
+  document.getElementById('filter-tag-posts').addEventListener('change', renderPosts);
+  document.getElementById('filter-vis-posts').addEventListener('change', renderPosts);
+
+  // ── USERS ────────────────────────────────
+  function loadUsers(){
+    sb.from('profiles').select('*').order('created_at',{ascending:true}).then(function(r){
+      allUsers=r.data||[];
+      renderUsers();
+    });
+  }
+  function renderUsers(){
+    var search=document.getElementById('search-users').value.toLowerCase();
+    var statusF=document.getElementById('filter-status-users').value;
+    var filtered=allUsers.filter(function(u){
+      var matchS=!search||(u.alias||'').toLowerCase().includes(search);
+      var matchSt=!statusF||(statusF==='banned'?u.banned:!u.banned);
+      return matchS&&matchSt;
+    });
+    document.getElementById('users-count').textContent=filtered.length+' usuarios';
+    var tbody=document.getElementById('users-tbody');
+    tbody.innerHTML='';
+    if(!filtered.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="6">Sin resultados</td></tr>'; return; }
+    filtered.forEach(function(u){
+      var isSelf=(u.id===adminUser.id);
+      var isAdmin=(u.role==='admin');
+      var tr=document.createElement('tr');
+      var postCount=allPosts.filter(function(p){ return p.user_id===u.id&&p.is_public; }).length;
+      tr.innerHTML=
+        '<td><span class="mono">@'+esc(u.alias)+'</span>'+(isSelf?' <span class="badge badge-admin" style="font-size:.48rem">Tú</span>':'')+'</td>'+
+        '<td>'+roleBadge(u.role)+'</td>'+
+        '<td>'+(u.banned?'<span class="badge badge-banned">Baneado</span>':'<span class="badge badge-active">Activo</span>')+'</td>'+
+        '<td class="mono">'+postCount+'</td>'+
+        '<td class="mono">'+fdate(u.created_at)+'</td>'+
+        '<td><div class="actions">'+
+          (canDo('edit_alias')&&!isAdmin&&!isSelf?'<button class="btn btn-ghost btn-sm btn-icon edit-alias-btn" data-id="'+u.id+'" data-alias="'+esc(u.alias)+'" title="Editar alias">✏</button>':'')+
+          (canDo('ban_users')&&!isAdmin&&!isSelf?
+            (!u.banned
+              ?'<button class="btn btn-warning btn-sm ban-btn" data-id="'+u.id+'" data-alias="'+esc(u.alias)+'">🚫 Banear</button>'
+              :'<button class="btn btn-success btn-sm unban-btn" data-id="'+u.id+'" data-alias="'+esc(u.alias)+'">✓ Desbanear</button>'
+            ):'')+
+        '</div></td>';
+      tbody.appendChild(tr);
+    });
+    // wire ban/unban
+    tbody.querySelectorAll('.ban-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var uid=this.getAttribute('data-id'), al=this.getAttribute('data-alias');
+        confirm('Banear usuario','@'+al+' no podrá iniciar sesión. ¿Confirmás?','Banear','btn-danger',function(){
+          sb.from('profiles').update({banned:true}).eq('id',uid).then(function(r){
+            if(r.error){ toast('Error: '+r.error.message,'err'); return; }
+            toast('@'+al+' baneado','ok');
+            allUsers.forEach(function(u){ if(u.id===uid) u.banned=true; });
+            renderUsers();
+          });
+        });
+      });
+    });
+    tbody.querySelectorAll('.unban-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var uid=this.getAttribute('data-id'), al=this.getAttribute('data-alias');
+        sb.from('profiles').update({banned:false}).eq('id',uid).then(function(r){
+          if(r.error){ toast('Error','err'); return; }
+          toast('@'+al+' desbaneado','ok');
+          allUsers.forEach(function(u){ if(u.id===uid) u.banned=false; });
+          renderUsers();
+        });
+      });
+    });
+    // wire edit alias
+    tbody.querySelectorAll('.edit-alias-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        editingAliasUid=this.getAttribute('data-id');
+        var curr=this.getAttribute('data-alias');
+        document.getElementById('alias-modal-current').textContent='Alias actual: @'+curr;
+        document.getElementById('alias-new-input').value=curr;
+        document.getElementById('alias-modal').classList.add('open');
+      });
+    });
+  }
+  document.getElementById('search-users').addEventListener('input', renderUsers);
+  document.getElementById('filter-status-users').addEventListener('change', renderUsers);
+
+  // Edit alias modal
+  document.getElementById('btn-alias-cancel').addEventListener('click',function(){ document.getElementById('alias-modal').classList.remove('open'); });
+  document.getElementById('btn-alias-save').addEventListener('click',function(){
+    var newAlias=document.getElementById('alias-new-input').value.trim();
+    if(!newAlias||newAlias.length<3){ toast('Alias muy corto','err'); return; }
+    sb.from('profiles').update({alias:newAlias}).eq('id',editingAliasUid).then(function(r){
+      if(r.error){ toast('Error: '+r.error.message,'err'); return; }
+      toast('Alias actualizado','ok');
+      allUsers.forEach(function(u){ if(u.id===editingAliasUid) u.alias=newAlias; });
+      document.getElementById('alias-modal').classList.remove('open');
+      renderUsers();
+    });
+  });
+
+  // ── MODS ─────────────────────────────────
+  function roleBadge(role){
+    if(role==='admin') return '<span class="badge badge-admin">Admin</span>';
+    if(role==='mod')   return '<span class="badge badge-mod">Mod</span>';
+    return '<span class="badge badge-user">User</span>';
+  }
+
+  function loadMods(){
+    if(adminProfile.role!=='admin'){ document.getElementById('mods-tbody').innerHTML='<tr class="loading-row"><td colspan="4">Solo el admin puede gestionar moderadores</td></tr>'; return; }
+    sb.from('profiles').select('*').eq('role','mod').order('created_at',{ascending:true}).then(function(r){
+      var mods=r.data||[];
+      var tbody=document.getElementById('mods-tbody');
+      tbody.innerHTML='';
+      if(!mods.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="4">Sin moderadores aún</td></tr>'; return; }
+      mods.forEach(function(m){
+        var perms=m.perms||{};
+        var permTags='';
+        if(perms.delete_posts) permTags+='<span class="perm-tag">Eliminar posts</span>';
+        if(perms.ban_users)    permTags+='<span class="perm-tag">Banear</span>';
+        if(perms.edit_alias)   permTags+='<span class="perm-tag">Editar alias</span>';
+        if(perms.view_private) permTags+='<span class="perm-tag">Ver privados</span>';
+        if(!permTags) permTags='<span style="color:var(--text-muted);font-size:.7rem">Sin permisos</span>';
+        var tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td><span class="mono">@'+esc(m.alias)+'</span></td>'+
+          '<td>'+permTags+'</td>'+
+          '<td>'+(m.banned?'<span class="badge badge-banned">Baneado</span>':'<span class="badge badge-active">Activo</span>')+'</td>'+
+          '<td><div class="actions">'+
+            '<button class="btn btn-ghost btn-sm edit-perms-btn" data-id="'+m.id+'" data-alias="'+esc(m.alias)+'" data-perms=\''+JSON.stringify(perms)+'\'>✏ Permisos</button>'+
+            (!m.banned
+              ?'<button class="btn btn-warning btn-sm ban-mod-btn" data-id="'+m.id+'" data-alias="'+esc(m.alias)+'">🚫 Banear</button>'
+              :'<button class="btn btn-success btn-sm unban-mod-btn" data-id="'+m.id+'" data-alias="'+esc(m.alias)+'">✓ Desbanear</button>')+
+            '<button class="btn btn-danger btn-sm demote-btn" data-id="'+m.id+'" data-alias="'+esc(m.alias)+'">↓ Quitar rol</button>'+
+          '</div></td>';
+        tbody.appendChild(tr);
+      });
+      // edit perms
+      tbody.querySelectorAll('.edit-perms-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          editingPermUid=this.getAttribute('data-id');
+          var perms=JSON.parse(this.getAttribute('data-perms')||'{}');
+          document.getElementById('perms-modal-alias').textContent='@'+this.getAttribute('data-alias');
+          document.getElementById('ep-delete-posts').checked=!!perms.delete_posts;
+          document.getElementById('ep-ban-users').checked=!!perms.ban_users;
+          document.getElementById('ep-edit-alias').checked=!!perms.edit_alias;
+          document.getElementById('ep-view-private').checked=!!perms.view_private;
+          document.getElementById('perms-modal').classList.add('open');
+        });
+      });
+      // ban mod
+      tbody.querySelectorAll('.ban-mod-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var uid=this.getAttribute('data-id'), al=this.getAttribute('data-alias');
+          confirm('Banear moderador','@'+al+' no podrá acceder al panel ni a la app.','Banear','btn-danger',function(){
+            sb.from('profiles').update({banned:true}).eq('id',uid).then(function(r){
+              if(r.error){ toast('Error','err'); return; }
+              toast('@'+al+' baneado','ok'); loadMods();
+            });
+          });
+        });
+      });
+      tbody.querySelectorAll('.unban-mod-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var uid=this.getAttribute('data-id'), al=this.getAttribute('data-alias');
+          sb.from('profiles').update({banned:false}).eq('id',uid).then(function(r){
+            if(r.error){ toast('Error','err'); return; }
+            toast('@'+al+' desbaneado','ok'); loadMods();
+          });
+        });
+      });
+      // demote
+      tbody.querySelectorAll('.demote-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var uid=this.getAttribute('data-id'), al=this.getAttribute('data-alias');
+          confirm('Quitar rol de moderador','@'+al+' volverá a ser un usuario normal.','Quitar rol','btn-danger',function(){
+            sb.from('profiles').update({role:'user',perms:{}}).eq('id',uid).then(function(r){
+              if(r.error){ toast('Error','err'); return; }
+              toast('@'+al+' ya no es moderador','ok'); loadMods();
+            });
+          });
+        });
+      });
+    });
+  }
+
+  // Save perms modal
+  document.getElementById('btn-perms-cancel').addEventListener('click',function(){ document.getElementById('perms-modal').classList.remove('open'); });
+  document.getElementById('btn-perms-save').addEventListener('click',function(){
+    var perms={
+      delete_posts: document.getElementById('ep-delete-posts').checked,
+      ban_users:    document.getElementById('ep-ban-users').checked,
+      edit_alias:   document.getElementById('ep-edit-alias').checked,
+      view_private: document.getElementById('ep-view-private').checked
+    };
+    sb.from('profiles').update({perms:perms}).eq('id',editingPermUid).then(function(r){
+      if(r.error){ toast('Error: '+r.error.message,'err'); return; }
+      toast('Permisos actualizados','ok');
+      document.getElementById('perms-modal').classList.remove('open');
+      loadMods();
+    });
+  });
+
+  // Create mod modal
+  document.getElementById('btn-create-mod').addEventListener('click',function(){
+    document.getElementById('mod-alias').value='';
+    document.getElementById('mod-email').value='';
+    document.getElementById('mod-pass').value='';
+    document.getElementById('perm-delete-posts').checked=false;
+    document.getElementById('perm-ban-users').checked=false;
+    document.getElementById('perm-edit-alias').checked=false;
+    document.getElementById('perm-view-private').checked=false;
+    document.getElementById('mod-err').classList.remove('show');
+    document.getElementById('mod-modal').classList.add('open');
+  });
+  document.getElementById('btn-mod-cancel').addEventListener('click',function(){ document.getElementById('mod-modal').classList.remove('open'); });
+  document.getElementById('btn-mod-create').addEventListener('click',function(){
+    var a=document.getElementById('mod-alias').value.trim();
+    var em=document.getElementById('mod-email').value.trim();
+    var pw=document.getElementById('mod-pass').value;
+    var er=document.getElementById('mod-err'); er.classList.remove('show');
+    if(!a||!em||!pw){ er.textContent='Completá todos los campos.'; er.classList.add('show'); return; }
+    if(a.length<3){ er.textContent='Alias muy corto.'; er.classList.add('show'); return; }
+    if(pw.length<6){ er.textContent='Contraseña mínimo 6 caracteres.'; er.classList.add('show'); return; }
+    var perms={
+      delete_posts: document.getElementById('perm-delete-posts').checked,
+      ban_users:    document.getElementById('perm-ban-users').checked,
+      edit_alias:   document.getElementById('perm-edit-alias').checked,
+      view_private: document.getElementById('perm-view-private').checked
+    };
+    // Sign up the new mod using a secondary supabase client to avoid displacing admin session
+    var sbTemp = supabase.createClient(
+      'https://ykijutktwofzzglhdses.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlraWp1dGt0d29menpnbGhkc2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTc3MjksImV4cCI6MjA4ODczMzcyOX0.Qz4iKwhmmoMuev34STFklSg-Aoult9yIFZ-y9U3y3LU',
+      { auth: { storageKey: 'lm_admin_temp_'+Date.now(), persistSession: false } }
+    );
+    sbTemp.auth.signUp({email:em,password:pw}).then(function(res){
+      if(res.error){ er.textContent=res.error.message; er.classList.add('show'); return; }
+      var newUid=res.data.user.id;
+      // insert profile with mod role
+      sb.from('profiles').insert({id:newUid, alias:a, role:'mod', perms:perms}).then(function(pr){
+        if(pr.error){ er.textContent='Error creando perfil: '+pr.error.message; er.classList.add('show'); return; }
+        toast('Moderador @'+a+' creado ✓','ok');
+        document.getElementById('mod-modal').classList.remove('open');
+        loadMods();
+      });
+    });
+  });
+
+  // ── CHECK BAN on login (mirror in main app) ──
+  // The main app should also check profiles.banned on activateApp
+  // This is handled by the main letter-me-v2.html via the ban column
+
+}); // end load
+</script>
+</body>
+</html>
