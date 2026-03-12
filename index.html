@@ -56,6 +56,10 @@
     label{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-weight:500}
     input[type="text"],input[type="email"],input[type="password"],textarea,select{background:var(--bg);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:.92rem;padding:.7rem .9rem;border-radius:10px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
     input:focus,textarea:focus,select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(244,99,42,.10)}
+
+    .forgot-link{font-family:var(--font-mono);font-size:.62rem;color:var(--text-muted);text-align:right;cursor:pointer;transition:color .2s;text-decoration:none;display:block;margin-top:-.4rem}
+    .forgot-link:hover{color:var(--orange)}
+
     .error-msg{font-family:var(--font-mono);font-size:.72rem;color:var(--danger);padding:.55rem .7rem;background:rgba(229,62,62,.07);border-radius:8px;border-left:3px solid var(--danger);display:none}
     .error-msg.show{display:block}
     /* PASSWORD TOGGLE */
@@ -354,6 +358,7 @@
       <div class="auth-form active" id="login-form">
         <div class="field-group"><label>Correo</label><input type="email" id="login-email" placeholder="tu@correo.com"/></div>
         <div class="field-group"><label>Contraseña</label><div class="pass-wrap"><input type="password" id="login-pass" placeholder="••••••••"/><button class="eye-btn" data-target="login-pass" type="button">👁</button></div></div>
+        <span class="forgot-link" id="btn-forgot">¿Olvidaste tu contraseña?</span>
         <div class="error-msg" id="login-err"></div>
         <button class="btn btn-primary btn-full" id="btn-login">Ingresar →</button>
       </div>
@@ -513,6 +518,27 @@
   </div>
 
   <footer class="app-footer" id="app-footer"></footer>
+</div>
+
+
+<!-- Modal recuperar contraseña -->
+<div class="modal-overlay" id="forgot-modal">
+  <div class="modal-box">
+    <h3>🔑 Recuperar contraseña</h3>
+    <p style="color:var(--text-dim);font-size:.84rem;line-height:1.55">Ingresá tu correo y te enviamos un link para crear una nueva contraseña.</p>
+    <div class="field-group">
+      <label>Correo</label>
+      <input type="email" id="forgot-email" placeholder="tu@correo.com"/>
+    </div>
+    <div class="error-msg" id="forgot-err"></div>
+    <div id="forgot-success" style="display:none;font-family:var(--font-mono);font-size:.72rem;color:#16a34a;padding:.5rem .7rem;background:rgba(22,163,74,.08);border-radius:8px;border-left:2px solid #16a34a">
+      ✓ Email enviado. Revisá tu bandeja de entrada.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-forgot-cancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="btn-forgot-send">Enviar link →</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal eliminar -->
@@ -1164,9 +1190,42 @@ window.addEventListener('load', function() {
     });
   });
 
+
+  // ── RECUPERAR CONTRASEÑA ─────────────────
+  document.getElementById('btn-forgot').addEventListener('click',function(){
+    document.getElementById('forgot-email').value='';
+    document.getElementById('forgot-err').classList.remove('show');
+    document.getElementById('forgot-success').style.display='none';
+    document.getElementById('forgot-modal').classList.add('open');
+    setTimeout(function(){ document.getElementById('forgot-email').focus(); },50);
+  });
+  document.getElementById('btn-forgot-cancel').addEventListener('click',function(){
+    document.getElementById('forgot-modal').classList.remove('open');
+  });
+  document.getElementById('btn-forgot-send').addEventListener('click',function(){
+    var email=document.getElementById('forgot-email').value.trim();
+    var err=document.getElementById('forgot-err'); err.classList.remove('show');
+    if(!email){ err.textContent='Ingresá tu correo.'; err.classList.add('show'); return; }
+    var btn=document.getElementById('btn-forgot-send');
+    btn.disabled=true; btn.textContent='Enviando...';
+    sb.auth.resetPasswordForEmail(email,{
+      redirectTo:'https://letterme.dev-ezmez.workers.dev/reset.html'
+    }).then(function(res){
+      btn.disabled=false; btn.textContent='Enviar link →';
+      if(res.error){ err.textContent=res.error.message; err.classList.add('show'); return; }
+      document.getElementById('forgot-success').style.display='block';
+      document.getElementById('btn-forgot-send').style.display='none';
+      setTimeout(function(){ document.getElementById('forgot-modal').classList.remove('open'); btn.style.display=''; },3500);
+    });
+  });
+  document.getElementById('forgot-email').addEventListener('keydown',function(e){
+    if(e.key==='Enter') document.getElementById('btn-forgot-send').click();
+  });
+
   // ── ESCAPE CIERRA MODALES ────────────────
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){
+      document.getElementById('forgot-modal').classList.remove('open');
       document.getElementById('img-modal').classList.remove('open');
       document.getElementById('link-modal').classList.remove('open');
       document.getElementById('del-modal').classList.remove('open');
