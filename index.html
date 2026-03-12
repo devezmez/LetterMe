@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Letter Me</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+  <meta name="referrer" content="no-referrer"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     :root{
       --bg:#f7f4f0;--surface:#fff;--surface2:#fdf9f6;--border:#ede8e2;--border2:#e2dbd3;
@@ -610,6 +614,24 @@ window.addEventListener('load', function() {
 
   // ── ESTADO ───────────────────────────────
   var user=null, alias=null, editingId=null, deletingId=null, detailId=null;
+
+  // ── RATE LIMIT (login) ───────────────────
+  var loginAttempts=0, loginBlockedUntil=0;
+  function checkRateLimit(){
+    var now=Date.now();
+    if(now < loginBlockedUntil){
+      var secs=Math.ceil((loginBlockedUntil-now)/1000);
+      return 'Demasiados intentos. Esperá '+secs+' segundos.';
+    }
+    loginAttempts++;
+    if(loginAttempts>=5){
+      loginBlockedUntil=Date.now()+60000; // 60s block
+      loginAttempts=0;
+      return 'Demasiados intentos. Esperá 60 segundos.';
+    }
+    return null;
+  }
+  function resetRateLimit(){ loginAttempts=0; loginBlockedUntil=0; }
   var isPublic=true; // visibilidad del editor
   var activeTag=null; // filtro activo de tema
 
@@ -698,6 +720,16 @@ window.addEventListener('load', function() {
   function page(p)  { document.body.setAttribute('data-page',p); }
   function fdate(iso){ return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}); }
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function sanitize(html){
+    // Allow safe formatting tags + images + links, block scripts/iframes/etc
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS:['b','strong','i','em','u','s','br','p','ul','ol','li','a','img','h1','h2','h3','font','span','div','blockquote'],
+      ALLOWED_ATTR:['href','src','target','rel','style','class','alt','title'],
+      ALLOW_DATA_ATTR:false,
+      FORBID_TAGS:['script','iframe','object','embed','form','input','button'],
+      FORBID_ATTR:['onerror','onload','onclick','onmouseover','onfocus','onblur','onchange','onsubmit','javascript']
+    });
+  }
   function toast(msg){
     var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
     setTimeout(function(){ t.classList.remove('show'); },3000);
@@ -785,8 +817,11 @@ window.addEventListener('load', function() {
     var pw=document.getElementById('login-pass').value;
     var er=document.getElementById('login-err'); er.classList.remove('show');
     if(!em||!pw){ er.textContent='Completá todos los campos.'; er.classList.add('show'); return; }
+    var rl=checkRateLimit();
+    if(rl){ er.textContent=rl; er.classList.add('show'); return; }
     sb.auth.signInWithPassword({email:em,password:pw}).then(function(res){
       if(res.error){ er.textContent=tErr(res.error.message); er.classList.add('show'); return; }
+      resetRateLimit();
       activateApp(res.data.user);
     });
   });
@@ -930,7 +965,7 @@ window.addEventListener('load', function() {
         document.getElementById('detail-content').innerHTML=
           '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+privLabel+'</div>'+
           '<div class="detail-title">'+esc(post.title)+'</div>'+
-          '<div class="detail-body">'+post.body+'</div>'+
+          '<div class="detail-body">'+sanitize(post.body)+'</div>'+
           '<div class="detail-actions">'+
             '<button class="push-btn-lg '+(hasPushed?'pushed':'')+'" id="detail-push-btn">↑ '+pushCount+' Push'+(pushCount!==1?'s':'')+'</button>'+
             ownerBtns+
