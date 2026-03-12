@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f4632a"/>
+      <stop offset="100%" style="stop-color:#ff8c5a"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f4632a;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#ff8c5a;stop-opacity:0.08"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded square -->
+  <rect width="64" height="64" rx="14" fill="#1a1510"/>
+  <!-- Subtle inner glow -->
+  <rect width="64" height="64" rx="14" fill="url(#g2)"/>
+  <!-- Border -->
+  <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="url(#g)" stroke-width="1.5" opacity="0.6"/>
+  <!-- L letter -->
+  <text x="6" y="46" font-family="'Syne','Arial Black',sans-serif" font-size="34" font-weight="800" fill="url(#g)" letter-spacing="-2">L</text>
+  <!-- M letter -->
+  <text x="30" y="46" font-family="'Syne','Arial Black',sans-serif" font-size="34" font-weight="800" fill="url(#g)" letter-spacing="-2">M</text>
+</svg>
