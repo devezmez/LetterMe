@@ -681,7 +681,13 @@ window.addEventListener('load', function() {
 
   // ── ACTIVAR APP ──────────────────────────
   function activateApp(u){
-    return sb.from('profiles').select('alias').eq('id',u.id).single().then(function(res){
+    return sb.from('profiles').select('alias,banned').eq('id',u.id).single().then(function(res){
+      if(res.data && res.data.banned){
+        sb.auth.signOut();
+        var er=document.getElementById('login-err')||document.getElementById('reg-err');
+        if(er){ er.textContent='Tu cuenta fue suspendida. Contactá al administrador.'; er.classList.add('show'); }
+        return;
+      }
       user=u; alias=(res.data&&res.data.alias)?res.data.alias:'Anónimo';
       document.getElementById('nav-alias').textContent='@'+alias;
       document.getElementById('c-avatar').textContent=alias[0].toUpperCase();
