@@ -376,12 +376,14 @@
     .tag-General  {background:rgba(99,102,241,.15);color:#6366f1;border:1px solid rgba(99,102,241,.3)}
     .tag-Tecnologia{background:rgba(6,182,212,.15);color:#0891b2;border:1px solid rgba(6,182,212,.3)}
     .tag-OffTopic {background:rgba(245,158,11,.15);color:#d97706;border:1px solid rgba(245,158,11,.3)}
+    .tag-Juegos   {background:rgba(16,185,129,.15);color:#059669;border:1px solid rgba(16,185,129,.3)}
     body.dark .tag-Musica   {background:rgba(168,85,247,.22);color:#c084fc}
     body.dark .tag-Arte     {background:rgba(236,72,153,.22);color:#f472b6}
     body.dark .tag-Deporte  {background:rgba(34,197,94,.22);color:#4ade80}
     body.dark .tag-General  {background:rgba(99,102,241,.22);color:#818cf8}
     body.dark .tag-Tecnologia{background:rgba(6,182,212,.22);color:#22d3ee}
     body.dark .tag-OffTopic {background:rgba(245,158,11,.22);color:#fbbf24}
+    body.dark .tag-Juegos   {background:rgba(16,185,129,.22);color:#34d399}
 
 
     /* PINNED / HIGHLIGHTED POSTS */
@@ -422,8 +424,8 @@
     /* FILTER SECTION in sidebar */
     .filter-sep{height:1px;background:var(--border);margin:1rem 0}
     .filter-title{font-family:var(--font-display);font-size:.85rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.75rem;text-align:center}
-    .filter-tags{display:flex;flex-direction:column;gap:.35rem}
-    .filter-tag-btn{display:flex;align-items:center;gap:.5rem;padding:.42rem .65rem;border-radius:10px;border:1.5px solid transparent;background:none;cursor:pointer;font-family:var(--font-body);font-size:.78rem;font-weight:500;color:var(--text-dim);transition:all .2s;text-align:left;width:100%}
+    .filter-tags{display:flex;flex-direction:column;gap:.22rem}
+    .filter-tag-btn{display:flex;align-items:center;gap:.5rem;padding:.32rem .65rem;border-radius:10px;border:1.5px solid transparent;background:none;cursor:pointer;font-family:var(--font-body);font-size:.78rem;font-weight:500;color:var(--text-dim);transition:all .2s;text-align:left;width:100%}
     .filter-tag-btn:hover{background:var(--bg);border-color:var(--border2)}
     .filter-tag-btn.active{background:var(--bg);border-color:var(--border2);font-weight:700;color:var(--text)}
     .filter-count{font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);margin-left:auto}
@@ -599,6 +601,7 @@
         <div class="filter-tags" id="filter-tags">
           <button class="filter-tag-btn" data-tag="Musica"><span class="tag-badge tag-Musica">🎵 Música</span><span class="filter-count" id="fc-Musica">0</span></button>
           <button class="filter-tag-btn" data-tag="Arte"><span class="tag-badge tag-Arte">🎨 Arte</span><span class="filter-count" id="fc-Arte">0</span></button>
+          <button class="filter-tag-btn" data-tag="Juegos"><span class="tag-badge tag-Juegos">🎮 Juegos</span><span class="filter-count" id="fc-Juegos">0</span></button>
           <button class="filter-tag-btn" data-tag="Deporte"><span class="tag-badge tag-Deporte">⚽ Deporte</span><span class="filter-count" id="fc-Deporte">0</span></button>
           <button class="filter-tag-btn" data-tag="General"><span class="tag-badge tag-General">💬 General</span><span class="filter-count" id="fc-General">0</span></button>
           <button class="filter-tag-btn" data-tag="Tecnologia"><span class="tag-badge tag-Tecnologia">💻 Tecnología</span><span class="filter-count" id="fc-Tecnologia">0</span></button>
@@ -687,6 +690,7 @@
           <select id="editor-tag">
             <option value="Musica">🎵 Música</option>
             <option value="Arte">🎨 Arte</option>
+            <option value="Juegos">🎮 Juegos</option>
             <option value="Deporte">⚽ Deporte</option>
             <option value="General" selected>💬 General</option>
             <option value="Tecnologia">💻 Tecnología</option>
@@ -917,6 +921,7 @@ window.addEventListener('load', function() {
   var TAGS={
     Musica:    {label:'🎵 Música',    cls:'tag-Musica'},
     Arte:      {label:'🎨 Arte',      cls:'tag-Arte'},
+    Juegos:    {label:'🎮 Juegos',     cls:'tag-Juegos'},
     Deporte:   {label:'⚽ Deporte',   cls:'tag-Deporte'},
     General:   {label:'💬 General',   cls:'tag-General'},
     Tecnologia:{label:'💻 Tecnología',cls:'tag-Tecnologia'},
