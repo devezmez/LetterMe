@@ -22,7 +22,6 @@
   <link rel="apple-touch-icon" href="/favicon.svg"/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
-  <meta http-equiv="X-Frame-Options" content="DENY"/>
   <meta name="referrer" content="no-referrer"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
@@ -79,6 +78,30 @@
 
     .forgot-link{font-family:var(--font-mono);font-size:.62rem;color:var(--text-muted);text-align:right;cursor:pointer;transition:color .2s;text-decoration:none;display:block;margin-top:-.4rem}
     .forgot-link:hover{color:var(--orange)}
+
+
+    /* T&C CHECKBOX */
+    .toc-wrap{display:flex;align-items:flex-start;gap:.55rem;padding:.5rem 0}
+    .toc-wrap input[type=checkbox]{width:16px;height:16px;margin-top:.15rem;accent-color:var(--orange);cursor:pointer;flex-shrink:0}
+    .toc-label{font-size:.78rem;color:var(--text-dim);line-height:1.5;cursor:pointer}
+    .toc-label a{color:var(--orange);text-decoration:underline;cursor:pointer}
+
+    /* T&C MODAL */
+    .toc-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:1.25rem}
+    .toc-modal-overlay.open{display:flex}
+    .toc-modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:560px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    .toc-modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .toc-modal-header h3{font-family:var(--font-display);font-size:1.05rem;font-weight:800}
+    .toc-modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);padding:.2rem .5rem;border-radius:6px;transition:color .2s}
+    .toc-modal-close:hover{color:var(--text)}
+    .toc-modal-body{overflow-y:auto;padding:1.25rem 1.5rem;flex:1}
+    .toc-modal-body h4{font-family:var(--font-display);font-size:.85rem;font-weight:700;color:var(--orange);margin:1.1rem 0 .4rem}
+    .toc-modal-body h4:first-child{margin-top:0}
+    .toc-modal-body p{font-size:.8rem;color:var(--text-dim);line-height:1.65;margin-bottom:.5rem}
+    .toc-modal-body ul{padding-left:1.1rem;margin:.3rem 0 .5rem}
+    .toc-modal-body ul li{font-size:.8rem;color:var(--text-dim);line-height:1.6;margin-bottom:.25rem}
+    .toc-modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0}
+    .toc-modal-footer .btn{max-width:180px}
 
     .error-msg{font-family:var(--font-mono);font-size:.72rem;color:var(--danger);padding:.55rem .7rem;background:rgba(229,62,62,.07);border-radius:8px;border-left:3px solid var(--danger);display:none}
     .error-msg.show{display:block}
@@ -481,6 +504,12 @@
         <div class="field-group"><label>Alias</label><input type="text" id="reg-alias" placeholder="tu_alias"/></div>
         <div class="field-group"><label>Correo</label><input type="email" id="reg-email" placeholder="tu@correo.com"/></div>
         <div class="field-group"><label>Contraseña</label><div class="pass-wrap"><input type="password" id="reg-pass" placeholder="mínimo 6 caracteres"/><button class="eye-btn" data-target="reg-pass" type="button">👁</button></div></div>
+        <div class="toc-wrap">
+          <input type="checkbox" id="toc-check"/>
+          <label class="toc-label" for="toc-check">
+            Acepto los <a id="toc-open-link">Términos y Condiciones</a> de Letter Me. Entiendo que soy el único responsable del contenido que publico.
+          </label>
+        </div>
         <div class="error-msg" id="reg-err"></div>
         <button class="btn btn-primary btn-full" id="btn-register">Crear cuenta →</button>
       </div>
@@ -646,6 +675,74 @@
 </div>
 
 
+
+<!-- Modal T&C -->
+<div class="toc-modal-overlay" id="toc-modal">
+  <div class="toc-modal">
+    <div class="toc-modal-header">
+      <h3>📋 Términos y Condiciones</h3>
+      <button class="toc-modal-close" id="toc-modal-close">✕</button>
+    </div>
+    <div class="toc-modal-body">
+
+      <h4>1. Aceptación</h4>
+      <p>Al registrarte en Letter Me aceptás estos Términos y Condiciones en su totalidad. Si no estás de acuerdo, no podés usar la plataforma.</p>
+
+      <h4>2. Responsabilidad del contenido</h4>
+      <p>Vos sos el <strong>único responsable</strong> del contenido que publicás. Letter Me actúa exclusivamente como canal de distribución y no se hace responsable por publicaciones de sus usuarios. Al publicar, garantizás que:</p>
+      <ul>
+        <li>Tenés los derechos necesarios sobre el contenido que compartís.</li>
+        <li>El contenido no viola derechos de autor, marcas registradas ni ningún derecho de terceros.</li>
+        <li>El contenido no es falso, engañoso ni difamatorio.</li>
+      </ul>
+
+      <h4>3. Contenido prohibido</h4>
+      <p>Queda estrictamente prohibido publicar:</p>
+      <ul>
+        <li>🔞 Contenido pornográfico o sexualmente explícito de cualquier tipo.</li>
+        <li>💀 Imágenes o descripciones de violencia extrema, gore o mutilación.</li>
+        <li>🚫 Discurso de odio, discriminación por raza, género, religión, orientación sexual, nacionalidad o cualquier otra condición.</li>
+        <li>📢 Spam, publicidad no autorizada o contenido de naturaleza comercial sin permiso expreso.</li>
+        <li>⚖️ Contenido que infrinja derechos de autor o propiedad intelectual de terceros.</li>
+        <li>👶 Cualquier contenido que involucre o perjudique a menores de edad.</li>
+        <li>🔑 Datos personales de terceros sin su consentimiento explícito.</li>
+      </ul>
+
+      <h4>4. Propiedad intelectual</h4>
+      <p>El contenido que publicás es tuyo. Al publicarlo en Letter Me nos otorgás una licencia limitada, no exclusiva y gratuita para mostrarlo dentro de la plataforma. No reclamamos propiedad sobre tu contenido.</p>
+      <p>Letter Me, su logo, nombre y diseño son propiedad exclusiva de sus creadores y no pueden ser reproducidos sin autorización.</p>
+
+      <h4>5. Moderación y sanciones</h4>
+      <p>Letter Me se reserva el derecho de eliminar cualquier contenido que viole estos términos y de suspender o banear cuentas sin previo aviso. La decisión es final e inapelable.</p>
+
+      <h4>6. Exención de responsabilidad</h4>
+      <p>Letter Me no se hace responsable por:</p>
+      <ul>
+        <li>Daños derivados del uso o la imposibilidad de uso de la plataforma.</li>
+        <li>Contenido publicado por terceros usuarios.</li>
+        <li>Interrupciones del servicio por mantenimiento o causas externas.</li>
+        <li>Pérdida de datos por fallos técnicos.</li>
+      </ul>
+
+      <h4>7. Privacidad y datos</h4>
+      <p>Recopilamos únicamente el correo electrónico y el alias que proporcionás al registrarte. No vendemos ni compartimos tus datos con terceros. Tu contraseña es almacenada de forma encriptada y nunca es accesible por el equipo de Letter Me.</p>
+
+      <h4>8. Cambios en los términos</h4>
+      <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios serán publicados en la plataforma. El uso continuado implica la aceptación de los nuevos términos.</p>
+
+      <h4>9. Jurisdicción</h4>
+      <p>Estos términos se rigen por las leyes aplicables en el país de residencia del operador de la plataforma. Cualquier disputa será resuelta por las vías legales correspondientes.</p>
+
+      <h4>10. Contacto</h4>
+      <p>Para consultas, reportes de contenido inapropiado o cualquier problema legal, podés contactarnos a través de la plataforma.</p>
+
+    </div>
+    <div class="toc-modal-footer">
+      <button class="btn btn-primary btn-sm" id="toc-accept-btn">✓ Entendido</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal recuperar contraseña -->
 <div class="modal-overlay" id="forgot-modal">
   <div class="modal-box">
@@ -724,7 +821,8 @@ window.addEventListener('load', function() {
     { v:'v2.2', desc:'Modo oscuro · Vista compacta/expandida · Responsivo total' },
     { v:'v2.3', desc:'Posts privados · Ranking podio · Layout sidebar' },
     { v:'v2.4', desc:'Etiquetas de tema · Filtro por tema · Tag badges' },
-    { v:'v2.5', desc:'OpenGraph · Usuarios en línea · Posts fijados · Seguridad reforzada' }
+    { v:'v2.5', desc:'OpenGraph · Usuarios en línea · Posts fijados · Seguridad reforzada' },
+    { v:'v2.6', desc:'Términos y Condiciones · Checkbox de aceptación en registro' }
   ];
   document.getElementById('app-footer').textContent = VERSIONS[VERSIONS.length-1].v;
 
@@ -976,6 +1074,8 @@ window.addEventListener('load', function() {
     var em=document.getElementById('reg-email').value.trim();
     var pw=document.getElementById('reg-pass').value;
     var er=document.getElementById('reg-err'); er.classList.remove('show');
+    var tocEl=document.getElementById('toc-check');
+    if(tocEl && !tocEl.checked){ er.textContent='Tenés que aceptar los Términos y Condiciones para registrarte.'; er.classList.add('show'); return; }
     if(!a||!em||!pw){ er.textContent='Completá todos los campos.'; er.classList.add('show'); return; }
     if(a.length<3)  { er.textContent='El alias debe tener al menos 3 caracteres.'; er.classList.add('show'); return; }
     if(pw.length<6) { er.textContent='La contraseña debe tener al menos 6 caracteres.'; er.classList.add('show'); return; }
@@ -1492,6 +1592,24 @@ window.addEventListener('load', function() {
     }
   }
 
+
+  // ── TÉRMINOS Y CONDICIONES ────────────────
+  document.getElementById('toc-open-link').addEventListener('click',function(e){
+    e.preventDefault();
+    document.getElementById('toc-modal').classList.add('open');
+  });
+  document.getElementById('toc-modal-close').addEventListener('click',function(){
+    document.getElementById('toc-modal').classList.remove('open');
+  });
+  document.getElementById('toc-accept-btn').addEventListener('click',function(){
+    document.getElementById('toc-check').checked=true;
+    document.getElementById('toc-modal').classList.remove('open');
+  });
+  // Close on overlay click
+  document.getElementById('toc-modal').addEventListener('click',function(e){
+    if(e.target===this) this.classList.remove('open');
+  });
+
   // ── RECUPERAR CONTRASEÑA ─────────────────
   document.getElementById('btn-forgot').addEventListener('click',function(){
     document.getElementById('forgot-email').value='';
@@ -1527,6 +1645,7 @@ window.addEventListener('load', function() {
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){
       document.getElementById('forgot-modal').classList.remove('open');
+      document.getElementById('toc-modal').classList.remove('open');
       document.getElementById('img-modal').classList.remove('open');
       document.getElementById('link-modal').classList.remove('open');
       document.getElementById('del-modal').classList.remove('open');
