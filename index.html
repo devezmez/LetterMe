@@ -294,7 +294,10 @@
 
     /* EDITOR */
     .editor-page-title{font-family:var(--font-display);font-size:1.45rem;font-weight:800;letter-spacing:-.5px;margin-bottom:1.2rem}
-    .editor-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+    .editor-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;overflow:visible;box-shadow:var(--shadow)}
+    .editor-toolbar-top{border-radius:18px 18px 0 0}
+    .editor-toolbar-mid{border-radius:0}
+    .editor-toolbars-sticky{position:sticky;top:54px;z-index:50;border-radius:18px 18px 0 0;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1)}
     .editor-toolbar{display:flex;align-items:center;gap:.16rem;padding:.52rem .9rem;border-bottom:1px solid var(--border);background:var(--surface2);flex-wrap:wrap}
     .tb-btn{width:27px;height:27px;border:none;background:none;border-radius:6px;cursor:pointer;font-family:var(--font-body);font-size:.8rem;font-weight:700;color:var(--text-dim);display:flex;align-items:center;justify-content:center;transition:all .2s}
     .tb-btn:hover{background:rgba(244,99,42,.12);color:var(--orange)}
@@ -650,6 +653,7 @@
   <div class="page" id="page-editor">
     <div class="editor-page-title" id="editor-heading">Nuevo artículo</div>
     <div class="editor-wrap">
+      <div class="editor-toolbars-sticky">
       <div class="editor-toolbar">
         <button class="tb-btn" id="tb-bold"><b>B</b></button>
         <button class="tb-btn" id="tb-italic"><i style="font-style:italic">I</i></button>
@@ -672,6 +676,7 @@
         <div class="tb-sep"></div>
         <button class="tb-btn" id="tb-image" title="Imagen" style="font-size:.9rem">🖼</button>
         <button class="tb-btn" id="tb-link" title="Insertar link" style="font-size:.9rem">🔗</button>
+      </div>
       </div>
       <input type="text" id="editor-title-input" placeholder="Título del artículo..."/>
       <div id="editor-body" contenteditable="true" data-placeholder="Escribí tu artículo aquí..."></div>
