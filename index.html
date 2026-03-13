@@ -6,14 +6,14 @@
   <title>Letter Me</title>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://letterme.dev-ezmez.workers.dev"/>
-  <meta property="og:title" content="Letter Me — Write · Share · Push ideas"/>
-  <meta property="og:description" content="Un espacio para escribir y compartir ideas sin algoritmos."/>
+  <meta property="og:title" content="Letter Me — Escribí. Compartí. Conectá."/>
+  <meta property="og:description" content="Un espacio para escribir y compartir ideas sin algoritmos. Publicá sobre música, arte, deporte, tecnología o lo que se te cruce por la cabeza."/>
   <meta property="og:image" content="https://letterme.dev-ezmez.workers.dev/og-image.png"/>
   <meta property="og:image:width" content="1200"/>
   <meta property="og:image:height" content="630"/>
   <meta property="og:locale" content="es_AR"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="Letter Me — Write · Share · Push ideas"/>
+  <meta name="twitter:title" content="Letter Me — Escribí. Compartí. Conectá."/>
   <meta name="twitter:description" content="Un espacio para escribir y compartir ideas sin algoritmos."/>
   <meta name="twitter:image" content="https://letterme.dev-ezmez.workers.dev/og-image.png"/>
   <meta name="description" content="Un espacio para escribir y compartir ideas sin algoritmos. Publicá sobre música, arte, deporte, tecnología o lo que se te cruce."/>
@@ -214,6 +214,9 @@
     .comment-body{font-size:.84rem;color:var(--text-dim);line-height:1.55}
     .comment-del{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.63rem;margin-left:auto;padding:.11rem .36rem;border-radius:4px;font-family:var(--font-mono);transition:color .2s}
     .comment-del:hover{color:var(--danger)}
+
+    .comments-disabled-notice{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);margin-bottom:.75rem}
+
     .no-comments{text-align:center;padding:1.2rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted)}
 
     /* EDITOR */
@@ -725,6 +728,7 @@ window.addEventListener('load', function() {
   var activeTag=null;
   var isPinned=false;
   var userRole='user';
+  var currentPostCommentsDisabled=false;
   var isPinned=false; // solo admin puede activar
   var userRole='user'; // rol del usuario logueado // filtro activo de tema
 
@@ -794,8 +798,10 @@ window.addEventListener('load', function() {
   document.getElementById('vis-private').addEventListener('click',function(){ setVisibility(false); });
   document.getElementById('pin-toggle').addEventListener('change',function(){
     isPinned=this.checked;
-    var wrap=document.getElementById('pin-toggle-wrap');
-    wrap.classList.toggle('active',isPinned);
+    document.getElementById('pin-toggle-wrap').classList.toggle('active',isPinned);
+  });
+  document.getElementById('comments-toggle').addEventListener('change',function(){
+    document.getElementById('comments-toggle-wrap').classList.toggle('active',this.checked);
   });
   document.getElementById('pin-toggle').addEventListener('change',function(){
     isPinned=this.checked;
@@ -1063,11 +1069,13 @@ window.addEventListener('load', function() {
         var privLabel=!post.is_public?'<span class="private-badge" style="font-size:.65rem">🔒 Privado</span>':'';
         var tagLabel=tagBadge(post.tag||'General');
         var pinnedLabel=post.pinned?'<span class="pinned-badge">📌 Fijado</span>':'';
+        var commBtn=(isOwner&&userRole==='admin')?
+          '<button class="pin-action-btn'+(post.comments_disabled?' pinned':'')+'" id="detail-comm-btn">'+(post.comments_disabled?'💬 Comentarios cerrados':'💬 Cerrar comentarios')+'</button>':''
         var pinBtn=(isOwner&&userRole==='admin')?'<button class="pin-action-btn'+(post.pinned?' pinned':'')+'" id="detail-pin-btn">'+(post.pinned?'📌 Desfijado':'📌 Fijar')+'</button>':'';
         var ownerBtns=isOwner
           ?'<button class="btn btn-ghost btn-sm" id="detail-edit-btn">✏ Editar</button>'+
             '<button class="btn btn-danger btn-sm" id="detail-del-btn">Eliminar</button>'+
-            '<button class="visibility-btn '+(post.is_public?'is-public':'')+'" id="detail-vis-btn">'+(post.is_public?'🌐 Público':'🔒 Privado')+'</button>'+pinBtn
+            '<button class="visibility-btn '+(post.is_public?'is-public':'')+'" id="detail-vis-btn">'+(post.is_public?'🌐 Público':'🔒 Privado')+'</button>'+pinBtn+commBtn
           :'';
         document.getElementById('detail-content').innerHTML=
           '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+tagLabel+privLabel+pinnedLabel+'</div>'+
@@ -1098,8 +1106,15 @@ window.addEventListener('load', function() {
             isPinned=!!(post.pinned);
             document.getElementById('pin-toggle').checked=!!post.pinned;
             document.getElementById('pin-toggle-wrap').classList.toggle('active',!!post.pinned);
-            if(userRole==='admin') document.getElementById('pin-toggle-wrap').classList.add('admin-visible');
-            else document.getElementById('pin-toggle-wrap').classList.remove('admin-visible');
+            document.getElementById('comments-toggle').checked=!!post.comments_disabled;
+            document.getElementById('comments-toggle-wrap').classList.toggle('active',!!post.comments_disabled);
+            if(userRole==='admin'){
+              document.getElementById('pin-toggle-wrap').classList.add('admin-visible');
+              document.getElementById('comments-toggle-wrap').classList.add('admin-visible');
+            } else {
+              document.getElementById('pin-toggle-wrap').classList.remove('admin-visible');
+              document.getElementById('comments-toggle-wrap').classList.remove('admin-visible');
+            }
             goTo('editor');
           });
           document.getElementById('detail-del-btn').addEventListener('click',function(){
@@ -1116,6 +1131,16 @@ window.addEventListener('load', function() {
               });
             });
           }
+          if(userRole==='admin' && document.getElementById('detail-comm-btn')){
+            document.getElementById('detail-comm-btn').addEventListener('click',function(){
+              var newVal=!post.comments_disabled;
+              sb.from('posts').update({comments_disabled:newVal}).eq('id',postId).eq('user_id',user.id).then(function(res){
+                if(res.error){ toast('Error','err'); return; }
+                toast(newVal?'💬 Comentarios cerrados':'💬 Comentarios abiertos');
+                loadDetail(postId);
+              });
+            });
+          }
           document.getElementById('detail-vis-btn').addEventListener('click',function(){
             var newPub=!post.is_public;
             sb.from('posts').update({is_public:newPub}).eq('id',postId).eq('user_id',user.id).then(function(res){
@@ -1125,6 +1150,7 @@ window.addEventListener('load', function() {
             });
           });
         }
+        currentPostCommentsDisabled=!!post.comments_disabled;
         loadComments(postId);
       });
     });
@@ -1132,6 +1158,14 @@ window.addEventListener('load', function() {
 
   function loadComments(postId){
     var cl=document.getElementById('comments-list');
+    var composer=document.querySelector('.comment-composer');
+    if(currentPostCommentsDisabled){
+      if(composer) composer.style.display='none';
+      cl.innerHTML='<div class="comments-disabled-notice">🔒 Los comentarios están desactivados en esta publicación.</div>';
+      return;
+    } else {
+      if(composer) composer.style.display='';
+    }
     sb.from('comments').select('*').eq('post_id',postId).order('created_at',{ascending:true}).then(function(r){
       var comments=r.data||[];
       if(!comments.length){ cl.innerHTML='<div class="no-comments">Aún no hay comentarios. ¡Sé el primero!</div>'; return; }
@@ -1249,9 +1283,10 @@ window.addEventListener('load', function() {
     if(!body||body==='<br>'){ toast('El contenido es requerido'); return; }
     var tag=document.getElementById('editor-tag').value||'General';
     var pinVal=(userRole==='admin')?isPinned:false;
+    var commDisabled=(userRole==='admin')?document.getElementById('comments-toggle').checked:false;
     var p=editingId
-      ? sb.from('posts').update({title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal}).eq('id',editingId).eq('user_id',user.id)
-      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal});
+      ? sb.from('posts').update({title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal,comments_disabled:commDisabled}).eq('id',editingId).eq('user_id',user.id)
+      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal,comments_disabled:commDisabled});
     p.then(function(r){
       if(r.error){ toast('Error: '+r.error.message); return; }
       toast(editingId?'Artículo actualizado ✓':(isPublic?'¡Artículo publicado!':'Guardado como privado 🔒'));
@@ -1355,20 +1390,25 @@ window.addEventListener('load', function() {
 
   // ── USUARIOS EN LÍNEA (Realtime Presence) ────
   var presenceChannel = null;
+  function updateOnlineCount(){
+    if(!presenceChannel) return;
+    var state = presenceChannel.presenceState();
+    var count = Object.keys(state).length;
+    var el = document.getElementById('online-count');
+    if(el) el.textContent = count > 0 ? count : 1;
+  }
   function initPresence(){
     if(presenceChannel) return;
-    presenceChannel = sb.channel('lobby-presence', {
-      config: { presence: { key: user.id } }
-    });
+    presenceChannel = sb.channel('lobby-presence');
     presenceChannel
-      .on('presence', { event: 'sync' }, function(){
-        var state = presenceChannel.presenceState();
-        var count = Object.keys(state).length;
-        document.getElementById('online-count').textContent = count;
-      })
+      .on('presence', { event: 'sync' },  updateOnlineCount)
+      .on('presence', { event: 'join' },  updateOnlineCount)
+      .on('presence', { event: 'leave' }, updateOnlineCount)
       .subscribe(function(status){
         if(status === 'SUBSCRIBED'){
-          presenceChannel.track({ user_id: user.id, alias: alias, online_at: new Date().toISOString() });
+          presenceChannel.track({ user_id: user.id, alias: alias, t: Date.now() });
+          // small delay to let server register presence
+          setTimeout(updateOnlineCount, 500);
         }
       });
   }
