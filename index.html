@@ -1067,13 +1067,11 @@ window.addEventListener('load', function() {
         var privLabel=!post.is_public?'<span class="private-badge" style="font-size:.65rem">🔒 Privado</span>':'';
         var tagLabel=tagBadge(post.tag||'General');
         var pinnedLabel=post.pinned?'<span class="pinned-badge">📌 Fijado</span>':'';
-        var commBtn=(isOwner&&userRole==='admin')?
-          '<button class="pin-action-btn'+(post.comments_disabled?' pinned':'')+'" id="detail-comm-btn">'+(post.comments_disabled?'💬 Comentarios cerrados':'💬 Cerrar comentarios')+'</button>':''
         var pinBtn=(isOwner&&userRole==='admin')?'<button class="pin-action-btn'+(post.pinned?' pinned':'')+'" id="detail-pin-btn">'+(post.pinned?'📌 Desfijado':'📌 Fijar')+'</button>':'';
         var ownerBtns=isOwner
           ?'<button class="btn btn-ghost btn-sm" id="detail-edit-btn">✏ Editar</button>'+
             '<button class="btn btn-danger btn-sm" id="detail-del-btn">Eliminar</button>'+
-            '<button class="visibility-btn '+(post.is_public?'is-public':'')+'" id="detail-vis-btn">'+(post.is_public?'🌐 Público':'🔒 Privado')+'</button>'+pinBtn+commBtn
+            '<button class="visibility-btn '+(post.is_public?'is-public':'')+'" id="detail-vis-btn">'+(post.is_public?'🌐 Público':'🔒 Privado')+'</button>'+pinBtn
           :'';
         document.getElementById('detail-content').innerHTML=
           '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+tagLabel+privLabel+pinnedLabel+'</div>'+
@@ -1125,16 +1123,6 @@ window.addEventListener('load', function() {
               sb.from('posts').update({pinned:newPin,highlighted:newPin}).eq('id',postId).eq('user_id',user.id).then(function(res){
                 if(res.error){ toast('Error al actualizar','err'); return; }
                 toast(newPin?'📌 Post fijado y resaltado':'Post desfijado');
-                loadDetail(postId);
-              });
-            });
-          }
-          if(userRole==='admin' && document.getElementById('detail-comm-btn')){
-            document.getElementById('detail-comm-btn').addEventListener('click',function(){
-              var newVal=!post.comments_disabled;
-              sb.from('posts').update({comments_disabled:newVal}).eq('id',postId).eq('user_id',user.id).then(function(res){
-                if(res.error){ toast('Error','err'); return; }
-                toast(newVal?'💬 Comentarios cerrados':'💬 Comentarios abiertos');
                 loadDetail(postId);
               });
             });
