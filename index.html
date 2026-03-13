@@ -930,10 +930,6 @@ window.addEventListener('load', function() {
     isPinned=this.checked;
     document.getElementById('pin-toggle-wrap').classList.toggle('active',isPinned);
   });
-  var _commToggle = document.getElementById('comments-toggle');
-  if(_commToggle) _commToggle.addEventListener('change',function(){
-    document.getElementById('comments-toggle-wrap').classList.toggle('active',this.checked);
-  });
   var _hlCheck = document.getElementById('highlight-check');
   if(_hlCheck) _hlCheck.addEventListener('change',function(){ document.getElementById('highlight-toggle').classList.toggle('active',this.checked); });
 
@@ -1236,14 +1232,14 @@ window.addEventListener('load', function() {
             isPinned=!!(post.pinned);
             document.getElementById('pin-toggle').checked=!!post.pinned;
             document.getElementById('pin-toggle-wrap').classList.toggle('active',!!post.pinned);
-            document.getElementById('comments-toggle').checked=!!post.comments_disabled;
-            document.getElementById('comments-toggle-wrap').classList.toggle('active',!!post.comments_disabled);
+            var ct=document.getElementById('comments-toggle'); if(ct) ct.checked=!!post.comments_disabled;
+            var ctw=document.getElementById('comments-toggle-wrap'); if(ctw) ctw.classList.toggle('active',!!post.comments_disabled);
             if(userRole==='admin'){
               document.getElementById('pin-toggle-wrap').classList.add('admin-visible');
-              document.getElementById('comments-toggle-wrap').classList.add('admin-visible');
+              if(document.getElementById('comments-toggle-wrap')) document.getElementById('comments-toggle-wrap').classList.add('admin-visible');
             } else {
               document.getElementById('pin-toggle-wrap').classList.remove('admin-visible');
-              document.getElementById('comments-toggle-wrap').classList.remove('admin-visible');
+              if(document.getElementById('comments-toggle-wrap')) document.getElementById('comments-toggle-wrap').classList.remove('admin-visible');
             }
             goTo('editor');
           });
@@ -1455,10 +1451,9 @@ window.addEventListener('load', function() {
     if(!body||body==='<br>'){ toast('El contenido es requerido'); return; }
     var tag=document.getElementById('editor-tag').value||'General';
     var pinVal=(userRole==='admin')?isPinned:false;
-    var commDisabled=(userRole==='admin')?document.getElementById('comments-toggle').checked:false;
     var p=editingId
-      ? sb.from('posts').update({title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal,comments_disabled:commDisabled}).eq('id',editingId).eq('user_id',user.id)
-      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal,comments_disabled:commDisabled});
+      ? sb.from('posts').update({title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal}).eq('id',editingId).eq('user_id',user.id)
+      : sb.from('posts').insert({user_id:user.id,alias:alias,title:title,body:body,is_public:isPublic,tag:tag,pinned:pinVal,highlighted:pinVal});
     p.then(function(r){
       if(r.error){ toast('Error: '+r.error.message); return; }
       toast(editingId?'Artículo actualizado ✓':(isPublic?'¡Artículo publicado!':'Guardado como privado 🔒'));
