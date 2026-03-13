@@ -444,12 +444,7 @@
     @media(max-width:640px){
   
     /* GUEST MODE */
-    body[data-screen="guest"] #auth-view{display:none}
-    body[data-screen="guest"] #app-view{display:block}
-    body[data-screen="guest"] #guest-bar{display:flex}
-    body[data-screen="guest"] .navbar{display:none}
-    body[data-screen="app"]   #guest-bar{display:none}
-    body[data-screen="auth"]  #guest-bar{display:none}
+
     #guest-bar{display:none;position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 1.25rem;height:54px;align-items:center;justify-content:space-between;gap:.5rem}
     .guest-nav-logo{font-family:var(--font-display);font-size:1.3rem;font-weight:800;letter-spacing:-.5px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;user-select:none;flex-shrink:0}
     .guest-nav-right{display:flex;align-items:center;gap:.5rem}
@@ -568,9 +563,9 @@
 <div id="guest-bar">
   <div class="guest-nav-logo" id="guest-logo">Letter Me</div>
   <div class="guest-nav-right">
-    <button class="theme-btn" id="btn-theme-guest" title="Cambiar tema">🌙</button>
     <button class="btn-guest-login" id="btn-guest-login">Iniciar sesión</button>
     <button class="btn-guest-reg" id="btn-guest-reg">Registrarse</button>
+    <button class="theme-btn" id="btn-theme-guest" title="Cambiar tema">🌙</button>
   </div>
 </div>
 
@@ -1207,8 +1202,12 @@ window.addEventListener('load', function() {
         el.innerHTML='<div class="empty-state"><div class="empty-icon">✦</div><p>'+(activeTag?'No hay posts con este tema todavía.':'Nadie escribió todavía. ¡Sé el primero!')+'</p></div>';
         return;
       }
+      var isGuest=document.body.getAttribute('data-screen')==='guest';
+      var myPushsQ = isGuest
+        ? Promise.resolve({data:[]})
+        : sb.from('pushs').select('post_id').eq('user_id',user.id);
       Promise.all([
-        sb.from('pushs').select('post_id').eq('user_id',user.id),
+        myPushsQ,
         sb.from('pushs').select('post_id'),
         sb.from('comments').select('post_id')
       ]).then(function(results){
