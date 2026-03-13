@@ -206,6 +206,10 @@
     .comment-input-wrap{flex:1;display:flex;flex-direction:column;gap:.42rem}
     .comment-input-wrap textarea{min-height:58px;resize:none;font-size:.85rem;border-radius:10px}
     .comment-send{align-self:flex-end}
+
+    .comment-del-mod{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.72rem;padding:.1rem .35rem;border-radius:5px;transition:all .2s;opacity:.5;font-family:var(--font-mono);margin-left:.2rem}
+    .comment-del-mod:hover{background:rgba(229,62,62,.1);color:var(--danger);opacity:1}
+
     .comment-item{display:flex;gap:.58rem;padding:.78rem 0;border-top:1px solid var(--border)}
     .comment-info{flex:1}
     .comment-meta{display:flex;align-items:center;gap:.42rem;margin-bottom:.18rem}
@@ -1158,6 +1162,7 @@ window.addEventListener('load', function() {
       cl.innerHTML='';
       comments.forEach(function(c){
         var isOwn=c.user_id===user.id;
+        var canMod=(userRole==='admin'||userRole==='mod');
         var div=document.createElement('div'); div.className='comment-item';
         div.innerHTML=
           '<div style="width:31px;height:31px;border-radius:50%;background:var(--grad);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:.74rem;font-weight:700;color:#fff">'+c.alias[0].toUpperCase()+'</div>'+
@@ -1166,12 +1171,22 @@ window.addEventListener('load', function() {
               '<span class="comment-alias">@'+esc(c.alias)+'</span>'+
               '<span class="comment-date">'+fdate(c.created_at)+'</span>'+
               (isOwn?'<button class="comment-del" data-cid="'+c.id+'">✕</button>':'')+
+              (canMod&&!isOwn?'<button class="comment-del-mod" data-cid="'+c.id+'" title="Eliminar comentario">🗑</button>':'')+
             '</div>'+
             '<div class="comment-body">'+esc(c.body)+'</div>'+
           '</div>';
         if(isOwn){
           div.querySelector('.comment-del').addEventListener('click',function(){
             sb.from('comments').delete().eq('id',this.getAttribute('data-cid')).then(function(){ loadComments(postId); });
+          });
+        }
+        if(canMod&&!isOwn){
+          div.querySelector('.comment-del-mod').addEventListener('click',function(){
+            var cid=this.getAttribute('data-cid');
+            sb.from('comments').delete().eq('id',cid).then(function(res){
+              if(res.error){ toast('Error al eliminar','err'); return; }
+              loadComments(postId);
+            });
           });
         }
         cl.appendChild(div);
