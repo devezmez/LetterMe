@@ -796,16 +796,14 @@ window.addEventListener('load', function() {
   }
   document.getElementById('vis-public').addEventListener('click',function(){ setVisibility(true); });
   document.getElementById('vis-private').addEventListener('click',function(){ setVisibility(false); });
-  document.getElementById('pin-toggle').addEventListener('change',function(){
+  var _pinToggle = document.getElementById('pin-toggle');
+  if(_pinToggle) _pinToggle.addEventListener('change',function(){
     isPinned=this.checked;
     document.getElementById('pin-toggle-wrap').classList.toggle('active',isPinned);
   });
-  document.getElementById('comments-toggle').addEventListener('change',function(){
+  var _commToggle = document.getElementById('comments-toggle');
+  if(_commToggle) _commToggle.addEventListener('change',function(){
     document.getElementById('comments-toggle-wrap').classList.toggle('active',this.checked);
-  });
-  document.getElementById('pin-toggle').addEventListener('change',function(){
-    isPinned=this.checked;
-    document.getElementById('pin-toggle-wrap').classList.toggle('active',isPinned);
   });
 
   // ── EMOJIS ───────────────────────────────
