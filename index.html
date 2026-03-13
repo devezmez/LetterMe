@@ -123,6 +123,29 @@
     .btn-full{width:100%;justify-content:center}
 
     /* NAVBAR */
+
+    /* GUEST MODE */
+    body[data-screen="guest"] #auth-view{display:none}
+    body[data-screen="guest"] #app-view{display:block}
+    body[data-screen="guest"] #guest-bar{display:flex}
+    body[data-screen="guest"] .navbar{display:none}
+    body[data-screen="app"]   #guest-bar{display:none}
+    body[data-screen="auth"]  #guest-bar{display:none}
+    #guest-bar{display:none;position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 1.25rem;height:54px;align-items:center;justify-content:space-between;gap:.5rem}
+    .guest-nav-logo{font-family:var(--font-display);font-size:1.3rem;font-weight:800;letter-spacing:-.5px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;user-select:none;flex-shrink:0}
+    .guest-nav-right{display:flex;align-items:center;gap:.5rem}
+    .btn-guest-login{padding:.38rem .9rem;border:1.5px solid var(--border2);border-radius:8px;background:none;color:var(--text-dim);font-family:var(--font-body);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s}
+    .btn-guest-login:hover{border-color:var(--orange);color:var(--orange)}
+    .btn-guest-reg{padding:.38rem .9rem;border:none;border-radius:8px;background:var(--grad);color:#fff;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(244,99,42,.25)}
+    .btn-guest-reg:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    /* Guest detail: hide interactive actions */
+    body[data-screen="guest"] .detail-actions .push-btn-lg{pointer-events:none;opacity:.4}
+    body[data-screen="guest"] #comments-form{display:none}
+    body[data-screen="guest"] .guest-cta{display:flex}
+    .guest-cta{display:none;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;margin-top:.75rem;flex-wrap:wrap}
+    .guest-cta p{font-size:.82rem;color:var(--text-dim);flex:1}
+    .guest-cta .btn-guest-reg{font-size:.78rem}
+
     .navbar{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 1.25rem;height:54px;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
     .nav-logo{font-family:var(--font-display);font-size:1.3rem;font-weight:800;letter-spacing:-.5px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;user-select:none;flex-shrink:0}
     .nav-center{display:flex;align-items:center;gap:.3rem}
@@ -419,7 +442,30 @@
       .ranking-sidebar{border-radius:16px;padding:1rem .75rem}
     }
     @media(max-width:640px){
-      .navbar{padding:0 .85rem;height:50px}
+  
+    /* GUEST MODE */
+    body[data-screen="guest"] #auth-view{display:none}
+    body[data-screen="guest"] #app-view{display:block}
+    body[data-screen="guest"] #guest-bar{display:flex}
+    body[data-screen="guest"] .navbar{display:none}
+    body[data-screen="app"]   #guest-bar{display:none}
+    body[data-screen="auth"]  #guest-bar{display:none}
+    #guest-bar{display:none;position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 1.25rem;height:54px;align-items:center;justify-content:space-between;gap:.5rem}
+    .guest-nav-logo{font-family:var(--font-display);font-size:1.3rem;font-weight:800;letter-spacing:-.5px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;user-select:none;flex-shrink:0}
+    .guest-nav-right{display:flex;align-items:center;gap:.5rem}
+    .btn-guest-login{padding:.38rem .9rem;border:1.5px solid var(--border2);border-radius:8px;background:none;color:var(--text-dim);font-family:var(--font-body);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s}
+    .btn-guest-login:hover{border-color:var(--orange);color:var(--orange)}
+    .btn-guest-reg{padding:.38rem .9rem;border:none;border-radius:8px;background:var(--grad);color:#fff;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(244,99,42,.25)}
+    .btn-guest-reg:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    /* Guest detail: hide interactive actions */
+    body[data-screen="guest"] .detail-actions .push-btn-lg{pointer-events:none;opacity:.4}
+    body[data-screen="guest"] #comments-form{display:none}
+    body[data-screen="guest"] .guest-cta{display:flex}
+    .guest-cta{display:none;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;margin-top:.75rem;flex-wrap:wrap}
+    .guest-cta p{font-size:.82rem;color:var(--text-dim);flex:1}
+    .guest-cta .btn-guest-reg{font-size:.78rem}
+
+    .navbar{padding:0 .85rem;height:50px}
       .nav-alias{display:none}
       .nav-btn span{display:none}
       .nav-btn{padding:.32rem .5rem;font-size:.74rem}
@@ -514,6 +560,17 @@
         <button class="btn btn-primary btn-full" id="btn-register">Crear cuenta →</button>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- GUEST BAR -->
+<div id="guest-bar">
+  <div class="guest-nav-logo" id="guest-logo">Letter Me</div>
+  <div class="guest-nav-right">
+    <button class="theme-btn" id="btn-theme-guest" title="Cambiar tema">🌙</button>
+    <button class="btn-guest-login" id="btn-guest-login">Iniciar sesión</button>
+    <button class="btn-guest-reg" id="btn-guest-reg">Registrarse</button>
   </div>
 </div>
 
@@ -822,7 +879,8 @@ window.addEventListener('load', function() {
     { v:'v2.3', desc:'Posts privados · Ranking podio · Layout sidebar' },
     { v:'v2.4', desc:'Etiquetas de tema · Filtro por tema · Tag badges' },
     { v:'v2.5', desc:'OpenGraph · Usuarios en línea · Posts fijados · Seguridad reforzada' },
-    { v:'v2.6', desc:'Términos y Condiciones · Checkbox de aceptación en registro' }
+    { v:'v2.6', desc:'Términos y Condiciones · Checkbox de aceptación en registro' },
+    { v:'v2.6.1', desc:'Modo visitante · Lobby público · Navbar para no registrados' }
   ];
   document.getElementById('app-footer').textContent = VERSIONS[VERSIONS.length-1].v;
 
@@ -997,8 +1055,10 @@ window.addEventListener('load', function() {
   sb.auth.onAuthStateChange(function(event,session){
     if(event==='SIGNED_IN'||event==='INITIAL_SESSION'){
       if(session&&session.user&&!user) activateApp(session.user);
+      else if(!session&&!user) activateGuest();
     } else if(event==='SIGNED_OUT'){
-      deactivateApp();
+      user=null; alias=null; cleanupPresence();
+      activateGuest();
     }
   });
 
@@ -1181,19 +1241,21 @@ window.addEventListener('load', function() {
   function loadDetail(postId){
     document.getElementById('detail-content').innerHTML='<div class="loading">Cargando...</div>';
     document.getElementById('comments-list').innerHTML='';
+    var isGuest=document.body.getAttribute('data-screen')==='guest';
     sb.from('posts').select('*').eq('id',postId).single().then(function(r){
       var post=r.data;
       if(!post){ document.getElementById('detail-content').innerHTML='<div class="loading">No encontrado.</div>'; return; }
-      // Seguridad: si es privado y no es el dueño, no mostrar
-      if(!post.is_public && post.user_id!==user.id){
+      // Privado: solo el dueño puede verlo (guests nunca)
+      if(!post.is_public && (isGuest || post.user_id!==user.id)){
         document.getElementById('detail-content').innerHTML='<div class="loading">Este artículo es privado.</div>';
         return;
       }
-      Promise.all([
-        sb.from('pushs').select('id').eq('post_id',postId).eq('user_id',user.id).maybeSingle(),
-        sb.from('pushs').select('id').eq('post_id',postId)
-      ]).then(function(pr){
-        var hasPushed=!!pr[0].data, pushCount=pr[1].data?pr[1].data.length:0, isOwner=post.user_id===user.id;
+      var pushQueries = isGuest
+        ? [Promise.resolve({data:null}), sb.from('pushs').select('id').eq('post_id',postId)]
+        : [sb.from('pushs').select('id').eq('post_id',postId).eq('user_id',user.id).maybeSingle(),
+           sb.from('pushs').select('id').eq('post_id',postId)];
+      Promise.all(pushQueries).then(function(pr){
+        var hasPushed=!isGuest&&!!pr[0].data, pushCount=pr[1].data?pr[1].data.length:0, isOwner=!isGuest&&post.user_id===user.id;
         var privLabel=!post.is_public?'<span class="private-badge" style="font-size:.65rem">🔒 Privado</span>':'';
         var tagLabel=tagBadge(post.tag||'General');
         var pinnedLabel=post.pinned?'<span class="pinned-badge">📌 Fijado</span>':'';
@@ -1587,6 +1649,56 @@ window.addEventListener('load', function() {
     }
   }
 
+
+
+  // ── GUEST MODE ───────────────────────────
+  function activateGuest(){
+    screen('guest');
+    // Apply saved theme
+    applyTheme(localStorage.getItem('lm_dark')==='1');
+    loadLobby();
+    loadRanking();
+  }
+
+  // Guest navbar wiring
+  document.getElementById('guest-logo').addEventListener('click', function(){ goTo('lobby'); });
+  document.getElementById('btn-guest-login').addEventListener('click', function(){
+    screen('auth');
+    // show login tab
+    document.getElementById('login-form').classList.add('active');
+    document.getElementById('register-form').classList.remove('active');
+    document.getElementById('tab-login').classList.add('active');
+    document.getElementById('tab-register').classList.remove('active');
+  });
+  document.getElementById('btn-guest-reg').addEventListener('click', function(){
+    screen('auth');
+    document.getElementById('register-form').classList.add('active');
+    document.getElementById('login-form').classList.remove('active');
+    document.getElementById('tab-register').classList.add('active');
+    document.getElementById('tab-login').classList.remove('active');
+  });
+  // Guest theme toggle (mirrors main toggle)
+  document.getElementById('btn-theme-guest').addEventListener('click', function(){
+    var isDark=document.body.classList.toggle('dark');
+    localStorage.setItem('lm_dark', isDark?'1':'0');
+    applyTheme(isDark);
+  });
+  // CTA button in detail
+  var guestCtaReg = document.getElementById('guest-cta-reg');
+  if(guestCtaReg){
+    guestCtaReg.addEventListener('click', function(){
+      screen('auth');
+      document.getElementById('register-form').classList.add('active');
+      document.getElementById('login-form').classList.remove('active');
+      document.getElementById('tab-register').classList.add('active');
+      document.getElementById('tab-login').classList.remove('active');
+    });
+  }
+  // Block write/profile for guests
+  document.getElementById('nb-editor').addEventListener('click', function(){
+    if(document.body.getAttribute('data-screen')==='guest'){ screen('auth'); return; }
+    goTo('editor');
+  });
 
   // ── TÉRMINOS Y CONDICIONES ────────────────
   document.getElementById('toc-open-link').addEventListener('click',function(e){
