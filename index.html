@@ -1350,9 +1350,12 @@ window.addEventListener('load', function() {
           document.getElementById('detail-mod-del-btn').addEventListener('click',function(){
             if(!confirm('¿Eliminar este post? Esta acción no se puede deshacer.')) return;
             sb.from('posts').delete().eq('id',postId).then(function(res){
-              if(res.error){ toast('Error: '+res.error.message,'err'); return; }
+              if(res.error){ toast('Error al eliminar: '+res.error.message,'err'); console.error('Delete error:',res.error); return; }
               toast('Post eliminado','ok');
-              goTo('lobby');
+              document.body.setAttribute('data-page','lobby');
+              document.querySelectorAll('.page').forEach(function(pg){ pg.classList.remove('active'); });
+              var lp=document.getElementById('page-lobby'); if(lp) lp.classList.add('active');
+              loadLobby(); loadRanking();
             });
           });
         }
