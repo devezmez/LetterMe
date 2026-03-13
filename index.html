@@ -914,10 +914,15 @@ window.addEventListener('load', function() {
     return null;
   }
   function resetRateLimit(){ loginAttempts=0; loginBlockedUntil=0; }
+  function canDo(perm){
+    if(userRole==='admin') return true;
+    return !!(userPerms && userPerms[perm]);
+  }
   var isPublic=true;
   var activeTag=null;
   var isPinned=false;
   var userRole='user';
+  var userPerms={};
   var currentPostCommentsDisabled=false;
   var editingCommentId=null;
   var isPinned=false; // solo admin puede activar
@@ -1040,14 +1045,14 @@ window.addEventListener('load', function() {
 
   // ── ACTIVAR APP ──────────────────────────
   function activateApp(u){
-    return sb.from('profiles').select('alias,banned,role').eq('id',u.id).single().then(function(res){
+    return sb.from('profiles').select('alias,banned,role,perms').eq('id',u.id).single().then(function(res){
       if(res.data && res.data.banned){
         sb.auth.signOut();
         var er=document.getElementById('login-err')||document.getElementById('reg-err');
         if(er){ er.textContent='Tu cuenta fue suspendida. Contactá al administrador.'; er.classList.add('show'); }
         return;
       }
-      user=u; alias=(res.data&&res.data.alias)?res.data.alias:'Anónimo'; userRole=res.data.role||'user';
+      user=u; alias=(res.data&&res.data.alias)?res.data.alias:'Anónimo'; userRole=res.data.role||'user'; userPerms=res.data.perms||{};
       setTimeout(function(){ var ht=document.getElementById('highlight-toggle'); if(ht&&(userRole==='admin'||userRole==='mod')) ht.classList.add('admin-visible'); },200); userRole=res.data.role||'user';
       document.getElementById('nav-alias').textContent='@'+alias;
       document.getElementById('c-avatar').textContent=alias[0].toUpperCase();
@@ -1269,11 +1274,14 @@ window.addEventListener('load', function() {
         var tagLabel=tagBadge(post.tag||'General');
         var pinnedLabel=post.pinned?'<span class="pinned-badge">📌 Fijado</span>':'';
         var pinBtn=(isOwner&&userRole==='admin')?'<button class="pin-action-btn'+(post.pinned?' pinned':'')+'" id="detail-pin-btn">'+(post.pinned?'📌 Desfijado':'📌 Fijar')+'</button>':'';
+        // Admin/mod can delete any post
+        var canModDelete=!isOwner&&!isGuest&&(userRole==='admin'||(userRole==='mod'&&canDo('delete_posts')));
+        var modDelBtn=canModDelete?'<button class="btn btn-danger btn-sm" id="detail-mod-del-btn">🗑 Eliminar post</button>':'';
         var ownerBtns=isOwner
           ?'<button class="btn btn-ghost btn-sm" id="detail-edit-btn">✏ Editar</button>'+
             '<button class="btn btn-danger btn-sm" id="detail-del-btn">Eliminar</button>'+
             '<button class="visibility-btn '+(post.is_public?'is-public':'')+'" id="detail-vis-btn">'+(post.is_public?'🌐 Público':'🔒 Privado')+'</button>'+pinBtn
-          :'';
+          :modDelBtn;
         document.getElementById('detail-content').innerHTML=
           '<div class="post-meta"><span class="alias-badge">@'+esc(post.alias)+'</span><span class="post-date">'+fdate(post.created_at)+'</span>'+tagLabel+privLabel+pinnedLabel+'</div>'+
           '<div class="detail-title">'+esc(post.title)+'</div>'+
@@ -1334,6 +1342,17 @@ window.addEventListener('load', function() {
               if(res.error){ toast('Error: '+res.error.message); return; }
               toast(newPub?'✅ Publicado en el Lobby':'🔒 Movido a privado');
               loadDetail(postId);
+            });
+          });
+        }
+        // Mod/admin delete wire
+        if(canModDelete && document.getElementById('detail-mod-del-btn')){
+          document.getElementById('detail-mod-del-btn').addEventListener('click',function(){
+            if(!confirm('¿Eliminar este post? Esta acción no se puede deshacer.')) return;
+            sb.from('posts').delete().eq('id',postId).then(function(res){
+              if(res.error){ toast('Error: '+res.error.message,'err'); return; }
+              toast('Post eliminado','ok');
+              goTo('lobby');
             });
           });
         }
