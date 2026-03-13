@@ -207,6 +207,29 @@
     .comment-input-wrap textarea{min-height:58px;resize:none;font-size:.85rem;border-radius:10px}
     .comment-send{align-self:flex-end}
 
+
+    /* COMMENT ACTIONS */
+    .comment-edit-btn{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.63rem;padding:.11rem .36rem;border-radius:4px;font-family:var(--font-mono);transition:color .2s}
+    .comment-edit-btn:hover{color:var(--orange)}
+    /* HIGHLIGHTED COMMENT */
+    .comment-item.comment-highlighted{background:linear-gradient(135deg,rgba(244,99,42,.07),rgba(255,140,90,.04));border-radius:10px;padding:.78rem .75rem;margin:0 -.75rem;border-top:1px solid rgba(244,99,42,.15)}
+    body.dark .comment-item.comment-highlighted{background:linear-gradient(135deg,rgba(244,99,42,.12),rgba(255,140,90,.07))}
+    .comment-highlighted .comment-alias{color:var(--orange)!important}
+    .role-badge-comment{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:.5rem;font-weight:700;padding:.08rem .35rem;border-radius:20px;margin-left:.3rem;vertical-align:middle}
+    .role-badge-admin{background:rgba(244,99,42,.15);color:var(--orange);border:1px solid rgba(244,99,42,.3)}
+    .role-badge-mod{background:rgba(6,182,212,.15);color:#22d3ee;border:1px solid rgba(6,182,212,.3)}
+    /* INLINE EDIT */
+    .comment-edit-wrap{display:none;margin-top:.5rem;gap:.4rem;flex-direction:column}
+    .comment-edit-wrap.open{display:flex}
+    .comment-edit-wrap textarea{font-size:.83rem;resize:none;border-radius:8px;min-height:52px;padding:.5rem .7rem;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);outline:none;transition:border-color .2s}
+    .comment-edit-wrap textarea:focus{border-color:var(--orange)}
+    .comment-edit-actions{display:flex;gap:.4rem}
+    /* HIGHLIGHT TOGGLE in composer */
+    .highlight-toggle{display:none;align-items:center;gap:.4rem;font-family:var(--font-mono);font-size:.62rem;color:var(--text-muted);cursor:pointer;user-select:none;padding:.2rem .5rem;border-radius:6px;transition:all .2s}
+    .highlight-toggle.admin-visible{display:flex}
+    .highlight-toggle input{width:13px;height:13px;accent-color:var(--orange);cursor:pointer}
+    .highlight-toggle.active{color:var(--orange)}
+
     .comment-del-mod{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.72rem;padding:.1rem .35rem;border-radius:5px;transition:all .2s;opacity:.5;font-family:var(--font-mono);margin-left:.2rem}
     .comment-del-mod:hover{background:rgba(229,62,62,.1);color:var(--danger);opacity:1}
 
@@ -529,7 +552,10 @@
         <div class="c-avatar" id="c-avatar">?</div>
         <div class="comment-input-wrap">
           <textarea id="comment-input" placeholder="Escribí un comentario..." rows="2"></textarea>
-          <button class="btn btn-primary btn-sm comment-send" id="btn-comment">Comentar</button>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
+            <button class="btn btn-primary btn-sm comment-send" id="btn-comment">Comentar</button>
+            <label class="highlight-toggle" id="highlight-toggle"><input type="checkbox" id="highlight-check"/> ✨ Resaltar</label>
+          </div>
         </div>
       </div>
       <div id="comments-list"></div>
@@ -733,6 +759,7 @@ window.addEventListener('load', function() {
   var isPinned=false;
   var userRole='user';
   var currentPostCommentsDisabled=false;
+  var editingCommentId=null;
   var isPinned=false; // solo admin puede activar
   var userRole='user'; // rol del usuario logueado // filtro activo de tema
 
@@ -809,6 +836,8 @@ window.addEventListener('load', function() {
   if(_commToggle) _commToggle.addEventListener('change',function(){
     document.getElementById('comments-toggle-wrap').classList.toggle('active',this.checked);
   });
+  var _hlCheck = document.getElementById('highlight-check');
+  if(_hlCheck) _hlCheck.addEventListener('change',function(){ document.getElementById('highlight-toggle').classList.toggle('active',this.checked); });
 
   // ── EMOJIS ───────────────────────────────
   var egrid=document.getElementById('emoji-grid');
@@ -861,7 +890,8 @@ window.addEventListener('load', function() {
         if(er){ er.textContent='Tu cuenta fue suspendida. Contactá al administrador.'; er.classList.add('show'); }
         return;
       }
-      user=u; alias=(res.data&&res.data.alias)?res.data.alias:'Anónimo'; userRole=res.data.role||'user'; userRole=res.data.role||'user';
+      user=u; alias=(res.data&&res.data.alias)?res.data.alias:'Anónimo'; userRole=res.data.role||'user';
+      setTimeout(function(){ var ht=document.getElementById('highlight-toggle'); if(ht&&(userRole==='admin'||userRole==='mod')) ht.classList.add('admin-visible'); },200); userRole=res.data.role||'user';
       document.getElementById('nav-alias').textContent='@'+alias;
       document.getElementById('c-avatar').textContent=alias[0].toUpperCase();
       screen('app'); goTo('lobby');
@@ -1161,29 +1191,69 @@ window.addEventListener('load', function() {
       if(!comments.length){ cl.innerHTML='<div class="no-comments">Aún no hay comentarios. ¡Sé el primero!</div>'; return; }
       cl.innerHTML='';
       comments.forEach(function(c){
-        var isOwn=c.user_id===user.id;
-        var canMod=(userRole==='admin'||userRole==='mod');
-        var div=document.createElement('div'); div.className='comment-item';
-        div.innerHTML=
+        var isOwn = c.user_id === user.id;
+        var cRole = c.role || 'user'; // role stored with comment
+        var isAdmin = userRole === 'admin';
+        var isMod   = userRole === 'mod';
+        // Can edit: own comment, OR admin (anyone), OR mod (non-admin comments)
+        var canEdit = isOwn || isAdmin || (isMod && cRole !== 'admin');
+        // Can delete: same rules as edit
+        var canDelete = isOwn || isAdmin || (isMod && cRole !== 'admin');
+        var isHighlighted = !!c.highlighted;
+
+        var roleBadge = cRole==='admin'
+          ? '<span class="role-badge-comment role-badge-admin">Admin</span>'
+          : cRole==='mod'
+            ? '<span class="role-badge-comment role-badge-mod">Mod</span>'
+            : '';
+
+        var div = document.createElement('div');
+        div.className = 'comment-item' + (isHighlighted ? ' comment-highlighted' : '');
+        div.setAttribute('data-cid', c.id);
+        div.innerHTML =
           '<div style="width:31px;height:31px;border-radius:50%;background:var(--grad);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:.74rem;font-weight:700;color:#fff">'+c.alias[0].toUpperCase()+'</div>'+
-          '<div class="comment-info">'+
+          '<div class="comment-info" style="flex:1;min-width:0">'+
             '<div class="comment-meta">'+
-              '<span class="comment-alias">@'+esc(c.alias)+'</span>'+
+              '<span class="comment-alias">@'+esc(c.alias)+'</span>'+roleBadge+
               '<span class="comment-date">'+fdate(c.created_at)+'</span>'+
-              (isOwn?'<button class="comment-del" data-cid="'+c.id+'">✕</button>':'')+
-              (canMod&&!isOwn?'<button class="comment-del-mod" data-cid="'+c.id+'" title="Eliminar comentario">🗑</button>':'')+
+              (canEdit  ? '<button class="comment-edit-btn" data-cid="'+c.id+'" data-body="'+c.body.replace(/"/g,"&quot;")+'">✏</button>' : '')+
+              (canDelete? '<button class="comment-del'+(isOwn?'':'-mod')+'" data-cid="'+c.id+'">✕</button>' : '')+
             '</div>'+
-            '<div class="comment-body">'+esc(c.body)+'</div>'+
+            '<div class="comment-body" id="cbody-'+c.id+'">'+esc(c.body)+'</div>'+
+            '<div class="comment-edit-wrap" id="cedit-'+c.id+'">'+
+              '<textarea id="ctextarea-'+c.id+'" rows="2">'+esc(c.body)+'</textarea>'+
+              '<div class="comment-edit-actions">'+
+                '<button class="btn btn-primary btn-sm cedit-save" data-cid="'+c.id+'" style="font-size:.72rem;padding:.3rem .7rem">Guardar</button>'+
+                '<button class="btn btn-ghost btn-sm cedit-cancel" data-cid="'+c.id+'" style="font-size:.72rem;padding:.3rem .7rem">Cancelar</button>'+
+              '</div>'+
+            '</div>'+
           '</div>';
-        if(isOwn){
-          div.querySelector('.comment-del').addEventListener('click',function(){
-            sb.from('comments').delete().eq('id',this.getAttribute('data-cid')).then(function(){ loadComments(postId); });
+
+        // Edit
+        if(canEdit){
+          div.querySelector('.comment-edit-btn').addEventListener('click',function(){
+            var cid=this.getAttribute('data-cid');
+            document.getElementById('cedit-'+cid).classList.add('open');
+            document.getElementById('ctextarea-'+cid).focus();
+          });
+          div.querySelector('.cedit-cancel').addEventListener('click',function(){
+            document.getElementById('cedit-'+this.getAttribute('data-cid')).classList.remove('open');
+          });
+          div.querySelector('.cedit-save').addEventListener('click',function(){
+            var cid=this.getAttribute('data-cid');
+            var newBody=document.getElementById('ctextarea-'+cid).value.trim();
+            if(!newBody) return;
+            sb.from('comments').update({body:newBody}).eq('id',cid).then(function(res){
+              if(res.error){ toast('Error al editar','err'); return; }
+              loadComments(postId);
+            });
           });
         }
-        if(canMod&&!isOwn){
-          div.querySelector('.comment-del-mod').addEventListener('click',function(){
-            var cid=this.getAttribute('data-cid');
-            sb.from('comments').delete().eq('id',cid).then(function(res){
+        // Delete
+        if(canDelete){
+          var delBtn = div.querySelector('.comment-del') || div.querySelector('.comment-del-mod');
+          if(delBtn) delBtn.addEventListener('click',function(){
+            sb.from('comments').delete().eq('id',this.getAttribute('data-cid')).then(function(res){
               if(res.error){ toast('Error al eliminar','err'); return; }
               loadComments(postId);
             });
@@ -1197,9 +1267,10 @@ window.addEventListener('load', function() {
   document.getElementById('btn-comment').addEventListener('click',function(){
     var inp=document.getElementById('comment-input'), body=inp.value.trim();
     if(!body||!detailId) return;
-    sb.from('comments').insert({post_id:detailId,user_id:user.id,alias:alias,body:body}).then(function(r){
+    var isHL = (userRole==='admin'||userRole==='mod') && document.getElementById('highlight-check') && document.getElementById('highlight-check').checked;
+    sb.from('comments').insert({post_id:detailId,user_id:user.id,alias:alias,body:body,role:userRole,highlighted:isHL}).then(function(r){
       if(r.error){ toast('Error: '+r.error.message); return; }
-      inp.value=''; loadComments(detailId); toast('Comentario publicado ✓');
+      inp.value=''; var hc=document.getElementById('highlight-check'); if(hc){hc.checked=false; document.getElementById('highlight-toggle').classList.remove('active');} loadComments(detailId); toast('Comentario publicado ✓');
     });
   });
 
