@@ -290,6 +290,23 @@
 
     .comments-disabled-notice{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);margin-bottom:.75rem}
 
+
+    /* COMMENT THREADS */
+    .comment-replies{margin-left:2.4rem;border-left:2px solid var(--border2);padding-left:.85rem;margin-top:.3rem}
+    .comment-replies .comment-item{padding:.55rem 0}
+    .comment-replies-l2{margin-left:2.4rem;border-left:2px solid var(--border);padding-left:.85rem;margin-top:.3rem}
+    .comment-replies-l2 .comment-item{padding:.45rem 0}
+    .reply-btn{background:none;border:none;cursor:pointer;font-family:var(--font-mono);font-size:.6rem;color:var(--text-muted);padding:.1rem .35rem;border-radius:4px;transition:all .2s;margin-left:.3rem}
+    .reply-btn:hover{color:var(--orange);background:rgba(244,99,42,.08)}
+    .reply-composer{display:none;margin-top:.55rem;gap:.5rem;flex-direction:column}
+    .reply-composer.open{display:flex}
+    .reply-composer textarea{min-height:48px;resize:none;font-size:.82rem;border-radius:8px;width:100%}
+    .reply-composer-actions{display:flex;gap:.4rem}
+    .reply-avatar{width:26px;height:26px;border-radius:50%;background:var(--grad);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:.65rem;font-weight:700;color:#fff}
+    .reply-row{display:flex;gap:.5rem;align-items:flex-start}
+    .replying-to{font-family:var(--font-mono);font-size:.6rem;color:var(--text-muted);margin-bottom:.3rem}
+    .replying-to span{color:var(--orange)}
+
     .no-comments{text-align:center;padding:1.2rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted)}
 
     /* EDITOR */
@@ -1365,7 +1382,128 @@ window.addEventListener('load', function() {
     });
   }
 
+  function buildCommentEl(c, postId, level){
+    var isGuest=document.body.getAttribute('data-screen')==='guest';
+    var isOwn = !isGuest && c.user_id === user.id;
+    var cRole = c.role || 'user';
+    var isAdmin = userRole === 'admin';
+    var isMod   = userRole === 'mod';
+    var canEdit   = !isGuest && (isOwn || isAdmin || (isMod && cRole !== 'admin'));
+    var canDelete = !isGuest && (isOwn || isAdmin || (isMod && cRole !== 'admin'));
+    var canReply  = !isGuest && level < 2; // max 2 levels
+    var isHighlighted = !!c.highlighted;
+    var roleBadge = cRole==='admin'
+      ? '<span class="role-badge-comment role-badge-admin">Admin</span>'
+      : cRole==='mod' ? '<span class="role-badge-comment role-badge-mod">Mod</span>' : '';
+
+    var div = document.createElement('div');
+    div.className = 'comment-item' + (isHighlighted ? ' comment-highlighted' : '');
+    div.setAttribute('data-cid', c.id);
+
+    var replyBtnHtml = canReply
+      ? '<button class="reply-btn" data-cid="'+c.id+'" data-alias="'+esc(c.alias)+'">↩ Responder</button>' : '';
+
+    div.innerHTML =
+      '<div style="width:'+(level===0?'31':'26')+'px;height:'+(level===0?'31':'26')+'px;border-radius:50%;background:var(--grad);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:'+(level===0?'.74':'.65')+'rem;font-weight:700;color:#fff">'+c.alias[0].toUpperCase()+'</div>'+
+      '<div class="comment-info" style="flex:1;min-width:0">'+
+        '<div class="comment-meta">'+
+          '<span class="comment-alias">@'+esc(c.alias)+'</span>'+roleBadge+
+          '<span class="comment-date">'+fdate(c.created_at)+'</span>'+
+          replyBtnHtml+
+          (canEdit   ? '<button class="comment-edit-btn" data-cid="'+c.id+'">✏</button>' : '')+
+          (canDelete ? '<button class="comment-del'+(isOwn?'':'-mod')+'" data-cid="'+c.id+'">✕</button>' : '')+
+        '</div>'+
+        '<div class="comment-body" id="cbody-'+c.id+'">'+esc(c.body)+'</div>'+
+        '<div class="comment-edit-wrap" id="cedit-'+c.id+'">'+
+          '<textarea id="ctextarea-'+c.id+'" rows="2">'+esc(c.body)+'</textarea>'+
+          '<div class="comment-edit-actions">'+
+            '<button class="btn btn-primary btn-sm cedit-save" data-cid="'+c.id+'" style="font-size:.72rem;padding:.3rem .7rem">Guardar</button>'+
+            '<button class="btn btn-ghost btn-sm cedit-cancel" data-cid="'+c.id+'" style="font-size:.72rem;padding:.3rem .7rem">Cancelar</button>'+
+          '</div>'+
+        '</div>'+
+        // Reply composer
+        (canReply ?
+          '<div class="reply-composer" id="rcomposer-'+c.id+'">'+
+            '<div class="replying-to">Respondiendo a <span>@'+esc(c.alias)+'</span></div>'+
+            '<div class="reply-row">'+
+              '<div class="reply-avatar">'+alias[0].toUpperCase()+'</div>'+
+              '<textarea class="reply-input" id="rinput-'+c.id+'" placeholder="Escribí tu respuesta..." rows="2"></textarea>'+
+            '</div>'+
+            '<div class="reply-composer-actions">'+
+              '<button class="btn btn-primary btn-sm reply-send" data-parent="'+c.id+'" style="font-size:.72rem">Responder</button>'+
+              '<button class="btn btn-ghost btn-sm reply-cancel" data-cid="'+c.id+'" style="font-size:.72rem">Cancelar</button>'+
+            '</div>'+
+          '</div>'
+        : '')+
+        '<div class="'+(level===0?'comment-replies':'comment-replies-l2')+'" id="replies-'+c.id+'"></div>'+
+      '</div>';
+
+    // Wire reply btn
+    if(canReply){
+      div.querySelector('.reply-btn').addEventListener('click',function(){
+        var cid=this.getAttribute('data-cid');
+        document.querySelectorAll('.reply-composer.open').forEach(function(el){ el.classList.remove('open'); });
+        document.getElementById('rcomposer-'+cid).classList.add('open');
+        document.getElementById('rinput-'+cid).focus();
+      });
+      div.querySelector('.reply-cancel').addEventListener('click',function(){
+        document.getElementById('rcomposer-'+this.getAttribute('data-cid')).classList.remove('open');
+      });
+      div.querySelector('.reply-send').addEventListener('click',function(){
+        var parentId=this.getAttribute('data-parent');
+        var inp=document.getElementById('rinput-'+parentId);
+        var body=inp.value.trim();
+        if(!body) return;
+        var btn=this; btn.disabled=true;
+        sb.from('comments').insert({
+          post_id:postId, user_id:user.id, alias:alias,
+          body:body, role:userRole, highlighted:false,
+          parent_id:parentId
+        }).then(function(res){
+          btn.disabled=false;
+          if(res.error){ toast('Error: '+res.error.message,'err'); return; }
+          inp.value='';
+          document.getElementById('rcomposer-'+parentId).classList.remove('open');
+          loadComments(postId);
+          toast('Respuesta publicada ✓');
+        });
+      });
+    }
+    // Edit
+    if(canEdit){
+      div.querySelector('.comment-edit-btn').addEventListener('click',function(){
+        var cid=this.getAttribute('data-cid');
+        document.getElementById('cedit-'+cid).classList.add('open');
+        document.getElementById('ctextarea-'+cid).focus();
+      });
+      div.querySelector('.cedit-cancel').addEventListener('click',function(){
+        document.getElementById('cedit-'+this.getAttribute('data-cid')).classList.remove('open');
+      });
+      div.querySelector('.cedit-save').addEventListener('click',function(){
+        var cid=this.getAttribute('data-cid');
+        var newBody=document.getElementById('ctextarea-'+cid).value.trim();
+        if(!newBody) return;
+        sb.from('comments').update({body:newBody}).eq('id',cid).then(function(res){
+          if(res.error){ toast('Error al editar','err'); return; }
+          loadComments(postId);
+        });
+      });
+    }
+    // Delete
+    if(canDelete){
+      var delBtn = div.querySelector('.comment-del') || div.querySelector('.comment-del-mod');
+      if(delBtn) delBtn.addEventListener('click',function(){
+        sb.from('comments').delete().eq('id',this.getAttribute('data-cid')).then(function(res){
+          if(res.error){ toast('Error al eliminar','err'); return; }
+          loadComments(postId);
+        });
+      });
+    }
+    return div;
+  }
+
   function loadComments(postId){
+    var isGuest=document.body.getAttribute('data-screen')==='guest';
     var cl=document.getElementById('comments-list');
     var composer=document.querySelector('.comment-composer');
     if(currentPostCommentsDisabled){
@@ -1373,82 +1511,38 @@ window.addEventListener('load', function() {
       cl.innerHTML='<div class="comments-disabled-notice">🔒 Los comentarios están desactivados en esta publicación.</div>';
       return;
     } else {
-      if(composer) composer.style.display='';
+      if(composer) composer.style.display= isGuest ? 'none' : '';
     }
     sb.from('comments').select('*').eq('post_id',postId).order('created_at',{ascending:true}).then(function(r){
-      var comments=r.data||[];
-      if(!comments.length){ cl.innerHTML='<div class="no-comments">Aún no hay comentarios. ¡Sé el primero!</div>'; return; }
+      var all=r.data||[];
+      if(!all.length){ cl.innerHTML='<div class="no-comments">Aún no hay comentarios. ¡Sé el primero!</div>'; return; }
       cl.innerHTML='';
-      comments.forEach(function(c){
-        var isOwn = c.user_id === user.id;
-        var cRole = c.role || 'user'; // role stored with comment
-        var isAdmin = userRole === 'admin';
-        var isMod   = userRole === 'mod';
-        // Can edit: own comment, OR admin (anyone), OR mod (non-admin comments)
-        var canEdit = isOwn || isAdmin || (isMod && cRole !== 'admin');
-        // Can delete: same rules as edit
-        var canDelete = isOwn || isAdmin || (isMod && cRole !== 'admin');
-        var isHighlighted = !!c.highlighted;
-
-        var roleBadge = cRole==='admin'
-          ? '<span class="role-badge-comment role-badge-admin">Admin</span>'
-          : cRole==='mod'
-            ? '<span class="role-badge-comment role-badge-mod">Mod</span>'
-            : '';
-
-        var div = document.createElement('div');
-        div.className = 'comment-item' + (isHighlighted ? ' comment-highlighted' : '');
-        div.setAttribute('data-cid', c.id);
-        div.innerHTML =
-          '<div style="width:31px;height:31px;border-radius:50%;background:var(--grad);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:.74rem;font-weight:700;color:#fff">'+c.alias[0].toUpperCase()+'</div>'+
-          '<div class="comment-info" style="flex:1;min-width:0">'+
-            '<div class="comment-meta">'+
-              '<span class="comment-alias">@'+esc(c.alias)+'</span>'+roleBadge+
-              '<span class="comment-date">'+fdate(c.created_at)+'</span>'+
-              (canEdit  ? '<button class="comment-edit-btn" data-cid="'+c.id+'" data-body="'+c.body.replace(/"/g,"&quot;")+'">✏</button>' : '')+
-              (canDelete? '<button class="comment-del'+(isOwn?'':'-mod')+'" data-cid="'+c.id+'">✕</button>' : '')+
-            '</div>'+
-            '<div class="comment-body" id="cbody-'+c.id+'">'+esc(c.body)+'</div>'+
-            '<div class="comment-edit-wrap" id="cedit-'+c.id+'">'+
-              '<textarea id="ctextarea-'+c.id+'" rows="2">'+esc(c.body)+'</textarea>'+
-              '<div class="comment-edit-actions">'+
-                '<button class="btn btn-primary btn-sm cedit-save" data-cid="'+c.id+'" style="font-size:.72rem;padding:.3rem .7rem">Guardar</button>'+
-                '<button class="btn btn-ghost btn-sm cedit-cancel" data-cid="'+c.id+'" style="font-size:.72rem;padding:.3rem .7rem">Cancelar</button>'+
-              '</div>'+
-            '</div>'+
-          '</div>';
-
-        // Edit
-        if(canEdit){
-          div.querySelector('.comment-edit-btn').addEventListener('click',function(){
-            var cid=this.getAttribute('data-cid');
-            document.getElementById('cedit-'+cid).classList.add('open');
-            document.getElementById('ctextarea-'+cid).focus();
-          });
-          div.querySelector('.cedit-cancel').addEventListener('click',function(){
-            document.getElementById('cedit-'+this.getAttribute('data-cid')).classList.remove('open');
-          });
-          div.querySelector('.cedit-save').addEventListener('click',function(){
-            var cid=this.getAttribute('data-cid');
-            var newBody=document.getElementById('ctextarea-'+cid).value.trim();
-            if(!newBody) return;
-            sb.from('comments').update({body:newBody}).eq('id',cid).then(function(res){
-              if(res.error){ toast('Error al editar','err'); return; }
-              loadComments(postId);
-            });
-          });
+      // Build tree: roots + children map
+      var roots=[], childrenOf={};
+      all.forEach(function(c){
+        if(!c.parent_id){ roots.push(c); }
+        else {
+          if(!childrenOf[c.parent_id]) childrenOf[c.parent_id]=[];
+          childrenOf[c.parent_id].push(c);
         }
-        // Delete
-        if(canDelete){
-          var delBtn = div.querySelector('.comment-del') || div.querySelector('.comment-del-mod');
-          if(delBtn) delBtn.addEventListener('click',function(){
-            sb.from('comments').delete().eq('id',this.getAttribute('data-cid')).then(function(res){
-              if(res.error){ toast('Error al eliminar','err'); return; }
-              loadComments(postId);
-            });
+      });
+      roots.forEach(function(root){
+        var rootEl = buildCommentEl(root, postId, 0);
+        // Level 1 replies
+        var l1 = childrenOf[root.id]||[];
+        var repliesContainer = rootEl.querySelector('#replies-'+root.id);
+        l1.forEach(function(reply1){
+          var r1El = buildCommentEl(reply1, postId, 1);
+          // Level 2 replies
+          var l2 = childrenOf[reply1.id]||[];
+          var r1Container = r1El.querySelector('#replies-'+reply1.id);
+          l2.forEach(function(reply2){
+            var r2El = buildCommentEl(reply2, postId, 2);
+            if(r1Container) r1Container.appendChild(r2El);
           });
-        }
-        cl.appendChild(div);
+          if(repliesContainer) repliesContainer.appendChild(r1El);
+        });
+        cl.appendChild(rootEl);
       });
     });
   }
@@ -1457,7 +1551,7 @@ window.addEventListener('load', function() {
     var inp=document.getElementById('comment-input'), body=inp.value.trim();
     if(!body||!detailId) return;
     var isHL = (userRole==='admin'||userRole==='mod') && document.getElementById('highlight-check') && document.getElementById('highlight-check').checked;
-    sb.from('comments').insert({post_id:detailId,user_id:user.id,alias:alias,body:body,role:userRole,highlighted:isHL}).then(function(r){
+    sb.from('comments').insert({post_id:detailId,user_id:user.id,alias:alias,body:body,role:userRole,highlighted:isHL,parent_id:null}).then(function(r){
       if(r.error){ toast('Error: '+r.error.message); return; }
       inp.value=''; var hc=document.getElementById('highlight-check'); if(hc){hc.checked=false; document.getElementById('highlight-toggle').classList.remove('active');} loadComments(detailId); toast('Comentario publicado ✓');
     });
