@@ -124,6 +124,34 @@
 
     /* NAVBAR */
 
+
+    /* NOTIFICATIONS */
+    .notif-btn{position:relative;background:none;border:none;cursor:pointer;font-size:1.05rem;padding:.3rem;border-radius:8px;transition:all .2s;color:var(--text-dim);display:flex;align-items:center;justify-content:center}
+    .notif-btn:hover{background:var(--surface2);color:var(--text)}
+    .notif-badge{position:absolute;top:-2px;right:-2px;background:var(--danger);color:#fff;font-family:var(--font-mono);font-size:.48rem;font-weight:700;min-width:14px;height:14px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--bg);pointer-events:none;display:none}
+    .notif-badge.show{display:flex}
+    .notif-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;width:320px;background:var(--surface);border:1px solid var(--border2);border-radius:16px;box-shadow:var(--shadow-lg);z-index:200;overflow:hidden}
+    .notif-panel.open{display:block}
+    .notif-panel-header{padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .notif-panel-header h4{font-family:var(--font-display);font-size:.82rem;font-weight:700}
+    .notif-mark-all{font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);background:none;border:none;cursor:pointer;transition:color .2s}
+    .notif-mark-all:hover{color:var(--orange)}
+    .notif-list{max-height:340px;overflow-y:auto}
+    .notif-item{display:flex;gap:.65rem;padding:.7rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;align-items:flex-start}
+    .notif-item:last-child{border-bottom:none}
+    .notif-item:hover{background:var(--surface2)}
+    .notif-item.unread{background:rgba(244,99,42,.04)}
+    body.dark .notif-item.unread{background:rgba(244,99,42,.08)}
+    .notif-item.unread .notif-dot{opacity:1}
+    .notif-dot{width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:5px;opacity:0;transition:opacity .2s}
+    .notif-icon{font-size:1rem;flex-shrink:0;width:28px;text-align:center}
+    .notif-text{flex:1;min-width:0}
+    .notif-text p{font-size:.78rem;color:var(--text-dim);line-height:1.45;margin:0}
+    .notif-text p strong{color:var(--text);font-weight:600}
+    .notif-text time{font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);margin-top:.2rem;display:block}
+    .notif-empty{text-align:center;padding:2rem 1rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted)}
+    .notif-wrap{position:relative}
+
     /* GUEST MODE */
     body[data-screen="guest"] #auth-view{display:none}
     body[data-screen="guest"] #app-view{display:block}
@@ -465,6 +493,34 @@
     }
     @media(max-width:640px){
   
+
+    /* NOTIFICATIONS */
+    .notif-btn{position:relative;background:none;border:none;cursor:pointer;font-size:1.05rem;padding:.3rem;border-radius:8px;transition:all .2s;color:var(--text-dim);display:flex;align-items:center;justify-content:center}
+    .notif-btn:hover{background:var(--surface2);color:var(--text)}
+    .notif-badge{position:absolute;top:-2px;right:-2px;background:var(--danger);color:#fff;font-family:var(--font-mono);font-size:.48rem;font-weight:700;min-width:14px;height:14px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--bg);pointer-events:none;display:none}
+    .notif-badge.show{display:flex}
+    .notif-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;width:320px;background:var(--surface);border:1px solid var(--border2);border-radius:16px;box-shadow:var(--shadow-lg);z-index:200;overflow:hidden}
+    .notif-panel.open{display:block}
+    .notif-panel-header{padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .notif-panel-header h4{font-family:var(--font-display);font-size:.82rem;font-weight:700}
+    .notif-mark-all{font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);background:none;border:none;cursor:pointer;transition:color .2s}
+    .notif-mark-all:hover{color:var(--orange)}
+    .notif-list{max-height:340px;overflow-y:auto}
+    .notif-item{display:flex;gap:.65rem;padding:.7rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;align-items:flex-start}
+    .notif-item:last-child{border-bottom:none}
+    .notif-item:hover{background:var(--surface2)}
+    .notif-item.unread{background:rgba(244,99,42,.04)}
+    body.dark .notif-item.unread{background:rgba(244,99,42,.08)}
+    .notif-item.unread .notif-dot{opacity:1}
+    .notif-dot{width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:5px;opacity:0;transition:opacity .2s}
+    .notif-icon{font-size:1rem;flex-shrink:0;width:28px;text-align:center}
+    .notif-text{flex:1;min-width:0}
+    .notif-text p{font-size:.78rem;color:var(--text-dim);line-height:1.45;margin:0}
+    .notif-text p strong{color:var(--text);font-weight:600}
+    .notif-text time{font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);margin-top:.2rem;display:block}
+    .notif-empty{text-align:center;padding:2rem 1rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted)}
+    .notif-wrap{position:relative}
+
     /* GUEST MODE */
 
     #guest-bar{display:none;position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 1.25rem;height:54px;align-items:center;justify-content:space-between;gap:.5rem}
@@ -602,6 +658,21 @@
     </div>
     <div class="nav-right">
       <span class="nav-alias" id="nav-alias"></span>
+      <div class="notif-wrap">
+        <button class="notif-btn" id="btn-notif" title="Notificaciones">
+          🔔
+          <span class="notif-badge" id="notif-badge">0</span>
+        </button>
+        <div class="notif-panel" id="notif-panel">
+          <div class="notif-panel-header">
+            <h4>🔔 Notificaciones</h4>
+            <button class="notif-mark-all" id="notif-mark-all">Marcar todo como leído</button>
+          </div>
+          <div class="notif-list" id="notif-list">
+            <div class="notif-empty">Sin notificaciones</div>
+          </div>
+        </div>
+      </div>
       <button class="theme-btn" id="btn-theme" title="Cambiar tema">🌙</button>
       <button class="nav-btn" id="btn-logout" style="border-color:transparent;color:var(--text-muted);font-size:.74rem">Salir</button>
     </div>
@@ -1076,7 +1147,12 @@ window.addEventListener('load', function() {
       screen('app'); goTo('lobby');
     });
   }
-  function deactivateApp(){ cleanupPresence(); user=null; alias=null; screen('auth'); }
+  function deactivateApp(){
+    cleanupPresence();
+    if(notifChannel){ sb.removeChannel(notifChannel); notifChannel=null; }
+    user=null; alias=null; userRole='user'; userPerms={};
+    screen('auth');
+  }
 
   // ── AUTH STATE ───────────────────────────
   sb.auth.onAuthStateChange(function(event,session){
@@ -1314,8 +1390,17 @@ window.addEventListener('load', function() {
         });
 
         document.getElementById('detail-push-btn').addEventListener('click',function(){
-          if(hasPushed) sb.from('pushs').delete().eq('post_id',postId).eq('user_id',user.id).then(function(){ loadDetail(postId); });
-          else          sb.from('pushs').insert({post_id:postId,user_id:user.id}).then(function(){ loadDetail(postId); });
+          if(hasPushed){
+            sb.from('pushs').delete().eq('post_id',postId).eq('user_id',user.id).then(function(){ loadDetail(postId); });
+          } else {
+            sb.from('pushs').insert({post_id:postId,user_id:user.id}).then(function(){
+              loadDetail(postId);
+              // Notify post owner
+              if(post.user_id !== user.id){
+                createNotification('push', post.user_id, postId, post.title, alias, null);
+              }
+            });
+          }
         });
         if(isOwner){
           document.getElementById('detail-edit-btn').addEventListener('click',function(){
@@ -1466,6 +1551,14 @@ window.addEventListener('load', function() {
           document.getElementById('rcomposer-'+parentId).classList.remove('open');
           loadComments(postId);
           toast('Respuesta publicada ✓');
+          // Notify parent comment author
+          sb.from('comments').select('user_id,alias').eq('id',parentId).single().then(function(pr){
+            if(pr.data && pr.data.user_id !== user.id){
+              sb.from('posts').select('title').eq('id',postId).single().then(function(pt){
+                createNotification('reply', pr.data.user_id, postId, pt.data?pt.data.title:'', alias, parentId);
+              });
+            }
+          });
         });
       });
     }
@@ -1554,6 +1647,12 @@ window.addEventListener('load', function() {
     sb.from('comments').insert({post_id:detailId,user_id:user.id,alias:alias,body:body,role:userRole,highlighted:isHL,parent_id:null}).then(function(r){
       if(r.error){ toast('Error: '+r.error.message); return; }
       inp.value=''; var hc=document.getElementById('highlight-check'); if(hc){hc.checked=false; document.getElementById('highlight-toggle').classList.remove('active');} loadComments(detailId); toast('Comentario publicado ✓');
+      // Notify post owner (if not own post)
+      sb.from('posts').select('user_id,title').eq('id',detailId).single().then(function(pr){
+        if(pr.data && pr.data.user_id !== user.id){
+          createNotification('comment', pr.data.user_id, detailId, pr.data.title, alias, null);
+        }
+      });
     });
   });
 
@@ -1871,6 +1970,124 @@ window.addEventListener('load', function() {
   });
   document.getElementById('forgot-email').addEventListener('keydown',function(e){
     if(e.key==='Enter') document.getElementById('btn-forgot-send').click();
+  });
+
+
+  // ── NOTIFICACIONES ───────────────────────
+  var notifChannel = null;
+
+  function timeAgo(iso){
+    var diff = Date.now() - new Date(iso).getTime();
+    var m = Math.floor(diff/60000), h = Math.floor(m/60), d = Math.floor(h/24);
+    if(d>0) return 'hace '+d+'d';
+    if(h>0) return 'hace '+h+'h';
+    if(m>0) return 'hace '+m+'m';
+    return 'ahora';
+  }
+
+  function notifIcon(type){
+    if(type==='push')    return '↑';
+    if(type==='comment') return '💬';
+    if(type==='reply')   return '↩';
+    return '🔔';
+  }
+
+  function notifText(n){
+    if(n.type==='push')    return '<strong>@'+esc(n.from_alias)+'</strong> le dio Push a tu post <strong>"'+esc(n.post_title||'')+'"</strong>';
+    if(n.type==='comment') return '<strong>@'+esc(n.from_alias)+'</strong> comentó en tu post <strong>"'+esc(n.post_title||'')+'"</strong>';
+    if(n.type==='reply')   return '<strong>@'+esc(n.from_alias)+'</strong> respondió a tu comentario en <strong>"'+esc(n.post_title||'')+'"</strong>';
+    return 'Nueva notificación';
+  }
+
+  function loadNotifications(){
+    sb.from('notifications').select('*').eq('user_id',user.id)
+      .order('created_at',{ascending:false}).limit(30)
+      .then(function(r){
+        var notifs = r.data||[];
+        var unread = notifs.filter(function(n){ return !n.read; }).length;
+        var badge  = document.getElementById('notif-badge');
+        var list   = document.getElementById('notif-list');
+        // Badge
+        if(unread > 0){
+          badge.textContent = unread > 99 ? '99+' : unread;
+          badge.classList.add('show');
+        } else {
+          badge.classList.remove('show');
+        }
+        // List
+        if(!notifs.length){
+          list.innerHTML='<div class="notif-empty">Sin notificaciones todavía</div>';
+          return;
+        }
+        list.innerHTML='';
+        notifs.forEach(function(n){
+          var item = document.createElement('div');
+          item.className = 'notif-item' + (!n.read?' unread':'');
+          item.innerHTML =
+            '<div class="notif-dot"></div>'+
+            '<div class="notif-icon">'+notifIcon(n.type)+'</div>'+
+            '<div class="notif-text">'+
+              '<p>'+notifText(n)+'</p>'+
+              '<time>'+timeAgo(n.created_at)+'</time>'+
+            '</div>';
+          // Click: mark read + go to post
+          item.addEventListener('click',function(){
+            if(!n.read) sb.from('notifications').update({read:true}).eq('id',n.id).then(function(){ loadNotifications(); });
+            document.getElementById('notif-panel').classList.remove('open');
+            if(n.post_id) goTo('detail', n.post_id);
+          });
+          list.appendChild(item);
+        });
+      });
+  }
+
+  function createNotification(type, toUserId, postId, postTitle, fromAlias, commentId){
+    if(!toUserId || toUserId === user.id) return; // no notificar a uno mismo
+    sb.from('notifications').insert({
+      user_id: toUserId,
+      type: type,
+      post_id: postId,
+      comment_id: commentId||null,
+      from_alias: fromAlias,
+      post_title: postTitle||'',
+      read: false
+    }).then(function(){});
+  }
+
+  function initNotifRealtime(){
+    if(notifChannel) return;
+    notifChannel = sb.channel('notif-'+user.id)
+      .on('postgres_changes',{
+        event:'INSERT', schema:'public', table:'notifications',
+        filter:'user_id=eq.'+user.id
+      }, function(){
+        loadNotifications();
+      })
+      .subscribe();
+  }
+
+  // Bell button toggle
+  document.getElementById('btn-notif').addEventListener('click',function(e){
+    e.stopPropagation();
+    var panel=document.getElementById('notif-panel');
+    panel.classList.toggle('open');
+    if(panel.classList.contains('open')) loadNotifications();
+  });
+
+  // Mark all read
+  document.getElementById('notif-mark-all').addEventListener('click',function(e){
+    e.stopPropagation();
+    sb.from('notifications').update({read:true}).eq('user_id',user.id).eq('read',false).then(function(){
+      loadNotifications();
+    });
+  });
+
+  // Close panel on outside click
+  document.addEventListener('click',function(e){
+    var panel=document.getElementById('notif-panel');
+    if(panel && panel.classList.contains('open') && !panel.contains(e.target) && e.target.id!=='btn-notif'){
+      panel.classList.remove('open');
+    }
   });
 
   // ── ESCAPE CIERRA MODALES ────────────────
